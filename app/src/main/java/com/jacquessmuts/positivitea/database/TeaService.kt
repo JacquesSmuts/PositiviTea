@@ -12,6 +12,7 @@ import com.jacquessmuts.positivitea.utils.subscribeAndLogE
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -22,10 +23,16 @@ import java.util.concurrent.TimeUnit
  */
 class TeaService(private val db: TeaDb): CoroutineService {
 
-    val timeState by lazy { TimeState() } // TODO: Get from local persistance or whatever
+    override val job by lazy { SupervisorJob() }
 
-    private val teabagDao: TeabagDao
-        get() = db.teabagDao()
+    private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
+
+    var timeState: TimeState? = null
+
+    private val timeStateDbObserver by lazy { TimeStateDbObserver(db.timeStateDao(), timeStateDbPublisher) }
+    private val timeStateDbPublisher: PublishSubject<TimeState> by lazy {
+        PublishSubject.create<TimeState>()
+    }
 
     var allTeaBags: List<Teabag> = listOf()
         private set(nuTeabags) {
@@ -39,20 +46,27 @@ class TeaService(private val db: TeaDb): CoroutineService {
     val teabagObservable: Observable<Any>
         get() = teabagPublisher.hide()
 
-    private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
-    private val dbPublisher: PublishSubject<List<Teabag>> by lazy {
+    private val teabagDbObserver by lazy { TeabagDbObserver(db.teabagDao(), teabagDbPublisher) }
+    private val teabagDbPublisher: PublishSubject<List<Teabag>> by lazy {
         PublishSubject.create<List<Teabag>>()
     }
 
     fun initialize() {
         Timber.i("initializing TeaService")
-        getTeabagsFromServer()
+
+        getTimeStateFromDb()
         getTeabagsFromDb()
+        getTeabagsFromServer()
 
-        db.invalidationTracker.addObserver(TeabagObserver(teabagDao, dbPublisher))
+        db.invalidationTracker.addObserver(teabagDbObserver)
+        db.invalidationTracker.addObserver(timeStateDbObserver)
 
-        rxSubs.add(dbPublisher.subscribeAndLogE {
+        rxSubs.add(teabagDbPublisher.subscribeAndLogE {
             allTeaBags = it
+        })
+
+        rxSubs.add(timeStateDbPublisher.subscribeAndLogE {
+            timeState = it
         })
 
         // If nothing is listening to this service for 10 seconds, twice in a row, go to sleep
@@ -73,28 +87,46 @@ class TeaService(private val db: TeaDb): CoroutineService {
 
     private fun getTeabagsFromDb(){
         launch {
-            allTeaBags = teabagDao.allTeabags
+            allTeaBags = db.teabagDao().allTeabags
         }
     }
 
-    fun insertAll(teabags: List<Teabag>) {
+    private fun getTimeStateFromDb(){
         launch {
-            teabags.forEach {
-                teabagDao.insert(it)
+            timeState = db.timeStateDao().timeState
+        }
+    }
+
+    fun saveTimeState() {
+        timeState?.let {
+            launch {
+                db.timeStateDao().insert(it)
             }
         }
     }
 
-    fun clear() {
+    fun saveTeabags(teabags: List<Teabag>) {
+        launch {
+            teabags.forEach {
+                db.teabagDao().insert(it)
+            }
+        }
+    }
+
+
+    private fun clear() {
         clearJobs()
         rxSubs.dispose()
+        db.invalidationTracker.removeObserver(teabagDbObserver)
+        db.invalidationTracker.removeObserver(timeStateDbObserver)
     }
 
     fun getTeabagsFromServer(forceLoad: Boolean = false) {
 
         Timber.v("Considering getting teabags from server")
 
-        if (!timeState.canMakeNewApiCall && !forceLoad)
+        // There might be a race condition here where timeState could be null on first startup
+        if (!(timeState?.canMakeNewApiCall != false || forceLoad))
             return
 
         Timber.d("Getting teabags from server")
@@ -116,7 +148,10 @@ class TeaService(private val db: TeaDb): CoroutineService {
                                 score = document.getLong(FirestoreConstants.FIELD_SCORE) ?: 0))
                         }
 
-                        insertAll(nuTeaBags)
+                        saveTeabags(nuTeaBags)
+                        timeState = TimeState(timeTeabagsUpdated = System.currentTimeMillis())
+                        saveTimeState()
+                        Timber.i("A total of ${nuTeaBags.size} Teabags downloaded")
 
                     } else {
                         Timber.e("Error getting documents. ${task.exception}")

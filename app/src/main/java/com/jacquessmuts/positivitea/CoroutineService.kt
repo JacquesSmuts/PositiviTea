@@ -14,7 +14,6 @@ import kotlin.coroutines.CoroutineContext
 interface CoroutineService: CoroutineScope {
 
     val job: Job
-        get() = SupervisorJob()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default + job

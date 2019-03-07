@@ -1,5 +1,8 @@
 package com.jacquessmuts.positivitea.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.jacquessmuts.positivitea.models.TimeState.Companion.TIMESTATE_TABLE
 import java.util.*
 
 /**
@@ -7,15 +10,20 @@ import java.util.*
  * This is a State which determines how often each service should do API calls.
  */
 
-data class TimeState(val timeTeabagsUpdated: Long = System.currentTimeMillis()) {
+@Entity(tableName = TIMESTATE_TABLE)
+data class TimeState(@PrimaryKey val id: Int = ID,
+                     val timeTeabagsUpdated: Long = System.currentTimeMillis()) {
 
     companion object {
-        const val MINIMUM_TIME_SINCE_TEA_UPDATE = 24 * 60 * 60 * 1000 // 24 hours
+        const val ID = 451
+        const val TIMESTATE_TABLE = "timestate_table"
+        const val MINIMUM_TIME_SINCE_TEA_UPDATE = 60000//24 * 60 * 60 * 1000 // 24 hours
+
     }
 
     val canMakeNewApiCall: Boolean
         get() {
-            return true//(System.currentTimeMillis() - timeTeabagsUpdated) > MINIMUM_TIME_SINCE_TEA_UPDATE
+            return (System.currentTimeMillis() - timeTeabagsUpdated) > MINIMUM_TIME_SINCE_TEA_UPDATE
         }
 
 }

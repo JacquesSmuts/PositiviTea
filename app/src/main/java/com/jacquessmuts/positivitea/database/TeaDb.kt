@@ -5,14 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.jacquessmuts.positivitea.models.Teabag
+import com.jacquessmuts.positivitea.models.TimeState
 
 @Database(
-    entities = [Teabag::class],
+    entities = [Teabag::class, TimeState::class],
     exportSchema = false,
     version = 1)
 abstract class TeaDb : RoomDatabase() {
 
     abstract fun teabagDao(): TeabagDao
+
+    abstract fun timeStateDao(): TimeStateDao
 
     companion object {
 

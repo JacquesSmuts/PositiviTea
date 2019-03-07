@@ -2,17 +2,19 @@ package com.jacquessmuts.positivitea
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Created by jacquessmuts on 2019-03-06
- * TODO: Add a class header comment!
+ * implement this to ensure your service (or any class) handles coroutine scope
  */
-abstract class CoroutineService: CoroutineScope {
+interface CoroutineService: CoroutineScope {
 
-    private val job = SupervisorJob()
+    val job: Job
+        get() = SupervisorJob()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default + job

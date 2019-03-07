@@ -2,8 +2,9 @@ package com.jacquessmuts.positivitea
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.jacquessmuts.positivitea.database.TeaService
-import com.jacquessmuts.positivitea.utils.subscribeAndLogE
+import com.jacquessmuts.positivitea.service.NotificationService
+import com.jacquessmuts.positivitea.service.TeaService
+import com.jacquessmuts.positivitea.util.subscribeAndLogE
 import io.reactivex.disposables.CompositeDisposable
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity(), KodeinAware {
     override val kodein by org.kodein.di.android.kodein()
 
     val teaService: TeaService by instance()
+    val notificationService: NotificationService by instance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +31,8 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         rxSubs.add(teaService.teabagObservable.subscribeAndLogE {
             Timber.i("Updated with ${teaService.allTeaBags.size}")
         })
+
+        notificationService.showRandomNotification()
     }
 
     override fun onPause() {

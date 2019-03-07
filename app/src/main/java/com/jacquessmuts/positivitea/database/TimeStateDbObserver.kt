@@ -2,10 +2,7 @@ package com.jacquessmuts.positivitea.database
 
 import androidx.room.InvalidationTracker
 
-import com.jacquessmuts.positivitea.database.TeabagDao
-import com.jacquessmuts.positivitea.models.Teabag
-import com.jacquessmuts.positivitea.models.TimeState
-import io.reactivex.Observable
+import com.jacquessmuts.positivitea.model.TimeState
 
 import io.reactivex.subjects.PublishSubject
 

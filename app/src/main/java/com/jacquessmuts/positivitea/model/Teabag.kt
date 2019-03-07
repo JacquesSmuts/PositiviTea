@@ -1,8 +1,8 @@
-package com.jacquessmuts.positivitea.models
+package com.jacquessmuts.positivitea.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.jacquessmuts.positivitea.models.Teabag.Companion.TEABAG_TABLE
+import com.jacquessmuts.positivitea.model.Teabag.Companion.TEABAG_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06

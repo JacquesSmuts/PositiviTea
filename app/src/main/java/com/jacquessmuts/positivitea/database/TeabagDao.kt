@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.jacquessmuts.positivitea.models.Teabag
-import com.jacquessmuts.positivitea.models.Teabag.Companion.TEABAG_TABLE
+import com.jacquessmuts.positivitea.model.Teabag
+import com.jacquessmuts.positivitea.model.Teabag.Companion.TEABAG_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06

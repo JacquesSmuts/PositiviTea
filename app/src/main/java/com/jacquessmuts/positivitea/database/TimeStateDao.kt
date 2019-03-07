@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.jacquessmuts.positivitea.models.TimeState
-import com.jacquessmuts.positivitea.models.TimeState.Companion.TIMESTATE_TABLE
+import com.jacquessmuts.positivitea.model.TimeState
+import com.jacquessmuts.positivitea.model.TimeState.Companion.TIMESTATE_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06

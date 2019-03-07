@@ -3,7 +3,8 @@ package com.jacquessmuts.positivitea
 import android.app.Application
 import android.content.Context
 import com.jacquessmuts.positivitea.database.TeaDb
-import com.jacquessmuts.positivitea.database.TeaService
+import com.jacquessmuts.positivitea.service.NotificationService
+import com.jacquessmuts.positivitea.service.TeaService
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.bind
@@ -23,14 +24,12 @@ class PositiviTeaApp: Application(), KodeinAware {
         bind<Context>() with instance(applicationContext)
         bind<TeaDb>() with singleton { TeaDb.initDb(applicationContext) }
         bind<TeaService>() with eagerSingleton{ TeaService(instance()) }
+        bind<NotificationService>() with singleton { NotificationService(applicationContext, instance(), instance()) }
     }
 
     override fun onCreate() {
         super.onCreate()
 
         Timber.plant(Timber.DebugTree())
-
-        val teaService: TeaService by instance()
-        teaService.initialize()
     }
 }

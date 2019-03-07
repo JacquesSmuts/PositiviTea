@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.jacquessmuts.positivitea.models.Teabag
-import com.jacquessmuts.positivitea.models.TimeState
+import com.jacquessmuts.positivitea.model.Teabag
+import com.jacquessmuts.positivitea.model.TimeState
 
 @Database(
     entities = [Teabag::class, TimeState::class],

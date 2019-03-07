@@ -1,14 +1,16 @@
-package com.jacquessmuts.positivitea.database
+package com.jacquessmuts.positivitea.service
 
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import com.jacquessmuts.positivitea.CoroutineService
+import com.jacquessmuts.positivitea.database.TeaDb
+import com.jacquessmuts.positivitea.database.TeabagDbObserver
+import com.jacquessmuts.positivitea.database.TimeStateDbObserver
 import com.jacquessmuts.positivitea.firestore.FirestoreConstants
-import com.jacquessmuts.positivitea.models.Teabag
-import com.jacquessmuts.positivitea.models.TimeState
-import com.jacquessmuts.positivitea.utils.subscribeAndLogE
+import com.jacquessmuts.positivitea.model.Teabag
+import com.jacquessmuts.positivitea.model.TimeState
+import com.jacquessmuts.positivitea.util.subscribeAndLogE
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
@@ -29,7 +31,12 @@ class TeaService(private val db: TeaDb): CoroutineService {
 
     var timeState: TimeState? = null
 
-    private val timeStateDbObserver by lazy { TimeStateDbObserver(db.timeStateDao(), timeStateDbPublisher) }
+    private val timeStateDbObserver by lazy {
+        TimeStateDbObserver(
+            db.timeStateDao(),
+            timeStateDbPublisher
+        )
+    }
     private val timeStateDbPublisher: PublishSubject<TimeState> by lazy {
         PublishSubject.create<TimeState>()
     }
@@ -46,12 +53,17 @@ class TeaService(private val db: TeaDb): CoroutineService {
     val teabagObservable: Observable<Any>
         get() = teabagPublisher.hide()
 
-    private val teabagDbObserver by lazy { TeabagDbObserver(db.teabagDao(), teabagDbPublisher) }
+    private val teabagDbObserver by lazy {
+        TeabagDbObserver(
+            db.teabagDao(),
+            teabagDbPublisher
+        )
+    }
     private val teabagDbPublisher: PublishSubject<List<Teabag>> by lazy {
         PublishSubject.create<List<Teabag>>()
     }
 
-    fun initialize() {
+    init {
         Timber.i("initializing TeaService")
 
         getTimeStateFromDb()

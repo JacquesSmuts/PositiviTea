@@ -1,4 +1,4 @@
-package com.jacquessmuts.positivitea
+package com.jacquessmuts.positivitea.service
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

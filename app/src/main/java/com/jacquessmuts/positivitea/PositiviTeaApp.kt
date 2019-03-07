@@ -29,5 +29,8 @@ class PositiviTeaApp: Application(), KodeinAware {
         super.onCreate()
 
         Timber.plant(Timber.DebugTree())
+
+        val teaService: TeaService by instance()
+        teaService.initialize()
     }
 }

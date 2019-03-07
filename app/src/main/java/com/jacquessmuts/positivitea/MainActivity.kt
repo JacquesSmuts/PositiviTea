@@ -21,12 +21,11 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        teaService.getTeabagsFromServer()
-
     }
 
     override fun onStart() {
         super.onStart()
+        Timber.i("started with ${teaService.allTeaBags.size}")
         rxSubs.add(teaService.teabagObservable.subscribeAndLogE {
             Timber.i("Updated with ${teaService.allTeaBags.size}")
         })

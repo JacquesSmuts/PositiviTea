@@ -7,10 +7,10 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.jacquessmuts.positivitea.CoroutineService
 import com.jacquessmuts.positivitea.firestore.FirestoreConstants
 import com.jacquessmuts.positivitea.models.Teabag
+import com.jacquessmuts.positivitea.models.TimeState
 import com.jacquessmuts.positivitea.utils.subscribeAndLogE
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit
  * This repository/service handles DB calls, manages the db and exposes db items to the app
  */
 class TeaService(private val db: TeaDb): CoroutineService {
+
+    val timeState by lazy { TimeState() } // TODO: Get from local persistance or whatever
 
     private val teabagDao: TeabagDao
         get() = db.teabagDao()
@@ -42,9 +44,11 @@ class TeaService(private val db: TeaDb): CoroutineService {
         PublishSubject.create<List<Teabag>>()
     }
 
-    init {
-        // TODO: have some sort of timingStateService to optimize api calls and manage notification intensity
-        putLocalTeabagsInMemory()
+    fun initialize() {
+        Timber.i("initializing TeaService")
+        getTeabagsFromServer()
+        getTeabagsFromDb()
+
         db.invalidationTracker.addObserver(TeabagObserver(teabagDao, dbPublisher))
 
         rxSubs.add(dbPublisher.subscribeAndLogE {
@@ -54,7 +58,7 @@ class TeaService(private val db: TeaDb): CoroutineService {
         // If nothing is listening to this service for 10 seconds, twice in a row, go to sleep
         rxSubs.add(Observable.interval(10, TimeUnit.SECONDS)
             .map { teabagPublisher.hasObservers() }
-            .buffer(2, 1)
+            .buffer(2)
             .filter {
                 var isObserved = true
                 it.forEach {
@@ -67,8 +71,10 @@ class TeaService(private val db: TeaDb): CoroutineService {
             })
     }
 
-    private fun putLocalTeabagsInMemory(){
-        launch { allTeaBags = teabagDao.allTeabags }
+    private fun getTeabagsFromDb(){
+        launch {
+            allTeaBags = teabagDao.allTeabags
+        }
     }
 
     fun insertAll(teabags: List<Teabag>) {
@@ -76,7 +82,6 @@ class TeaService(private val db: TeaDb): CoroutineService {
             teabags.forEach {
                 teabagDao.insert(it)
             }
-            putLocalTeabagsInMemory()
         }
     }
 
@@ -85,7 +90,14 @@ class TeaService(private val db: TeaDb): CoroutineService {
         rxSubs.dispose()
     }
 
-    fun getTeabagsFromServer() {
+    fun getTeabagsFromServer(forceLoad: Boolean = false) {
+
+        Timber.v("Considering getting teabags from server")
+
+        if (!timeState.canMakeNewApiCall && !forceLoad)
+            return
+
+        Timber.d("Getting teabags from server")
 
         val firestore = FirebaseFirestore.getInstance()
 

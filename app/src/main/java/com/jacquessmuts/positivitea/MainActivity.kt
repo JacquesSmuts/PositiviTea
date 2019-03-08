@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity(), KodeinAware {
             Timber.i("Updated with ${teaService.allTeaBags.size}")
         })
 
-        notificationService.showRandomNotification()
+        notificationService.scheduleNextNotification()
     }
 
     override fun onPause() {

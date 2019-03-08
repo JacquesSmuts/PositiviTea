@@ -7,10 +7,14 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.work.Constraints
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.database.TeaDb
 import com.jacquessmuts.positivitea.model.TeaPreferences
 import com.jacquessmuts.positivitea.model.Teabag
+import com.jacquessmuts.positivitea.workmanager.NotificationWorker
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.coroutines.SupervisorJob
@@ -18,6 +22,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 /**
@@ -67,7 +72,6 @@ class NotificationService(private val context: Context,
                 delay(2000)
             }
 
-
             val teabagNumber = teaService.allTeaBags.size-1
             if (teabagNumber < 0)
                 this.coroutineContext.cancel()
@@ -75,6 +79,17 @@ class NotificationService(private val context: Context,
             val selection = Random.nextInt(0, teabagNumber)
             showNotification(teaService.allTeaBags[selection])
         }
+    }
+
+
+    fun scheduleNextNotification() {
+
+        val notificationWorkRequest =
+            OneTimeWorkRequestBuilder<NotificationWorker>()
+                .setInitialDelay(5, TimeUnit.SECONDS)
+                .build()
+
+        WorkManager.getInstance().enqueue(notificationWorkRequest)
     }
 
     private fun showNotification(teabag: Teabag) {

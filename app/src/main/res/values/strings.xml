@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PositiviTea</string>
+    <string name="notification_channel_name">Teabag Stream</string>
+    <string name="notification_channel_description">This is the channel where all notifications are delivered</string>
 </resources>

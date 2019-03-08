@@ -14,6 +14,7 @@ import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.database.TeaDb
 import com.jacquessmuts.positivitea.model.TeaPreferences
 import com.jacquessmuts.positivitea.model.Teabag
+import com.jacquessmuts.positivitea.util.ConversionUtils
 import com.jacquessmuts.positivitea.workmanager.NotificationWorker
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.view.*
@@ -30,11 +31,11 @@ import kotlin.random.Random
  * This service schedules notifications, and schedules itself to wake up to schedule more notifications
  */
 class NotificationService(private val context: Context,
-                          private val db: TeaDb,
                           private val teaService: TeaService): CoroutineService {
 
     companion object {
         const val CHANNEL_ID = "111"
+        const val WORKER_TAG = "notification_loop"
     }
 
     override val job by lazy { SupervisorJob() }
@@ -66,14 +67,18 @@ class NotificationService(private val context: Context,
     }
 
     fun showRandomNotification() {
+
+        Timber.v("showing random notification")
+
         launch {
 
             if (teaService.allTeaBags.isEmpty()){
+                // find a better way to wait for the list to be finished loaded
                 delay(2000)
             }
 
-            val teabagNumber = teaService.allTeaBags.size-1
-            if (teabagNumber < 0)
+            val teabagNumber = teaService.allTeaBags.size
+            if (teabagNumber < 1)
                 this.coroutineContext.cancel()
 
             val selection = Random.nextInt(0, teabagNumber)
@@ -84,9 +89,15 @@ class NotificationService(private val context: Context,
 
     fun scheduleNextNotification() {
 
+        Timber.d("scheduling next notification")
+
+        // First check if there isn't already a notification scheduled. If so, cancel it.
+        WorkManager.getInstance().getWorkInfosByTag(WORKER_TAG).cancel(false)
+
         val notificationWorkRequest =
             OneTimeWorkRequestBuilder<NotificationWorker>()
-                .setInitialDelay(5, TimeUnit.SECONDS)
+                .setInitialDelay(ConversionUtils.getRandomizedTime(60), TimeUnit.SECONDS)
+                .addTag(WORKER_TAG)
                 .build()
 
         WorkManager.getInstance().enqueue(notificationWorkRequest)

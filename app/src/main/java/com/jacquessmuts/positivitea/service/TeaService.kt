@@ -8,7 +8,7 @@ import com.jacquessmuts.positivitea.database.TeaDb
 import com.jacquessmuts.positivitea.database.TeabagDbObserver
 import com.jacquessmuts.positivitea.database.TimeStateDbObserver
 import com.jacquessmuts.positivitea.firestore.FirestoreConstants
-import com.jacquessmuts.positivitea.model.Teabag
+import com.jacquessmuts.positivitea.model.TeaBag
 import com.jacquessmuts.positivitea.model.TimeState
 import com.jacquessmuts.positivitea.util.subscribeAndLogE
 import io.reactivex.Observable
@@ -41,7 +41,7 @@ class TeaService(private val db: TeaDb): CoroutineService {
         PublishSubject.create<TimeState>()
     }
 
-    var allTeaBags: List<Teabag> = listOf()
+    var allTeaBags: List<TeaBag> = listOf()
         private set(nuTeabags) {
             field = nuTeabags
             teabagPublisher.onNext(Any())
@@ -56,11 +56,11 @@ class TeaService(private val db: TeaDb): CoroutineService {
     private val teabagDbObserver by lazy {
         TeabagDbObserver(
             db.teabagDao(),
-            teabagDbPublisher
+            teaBagDbPublisher
         )
     }
-    private val teabagDbPublisher: PublishSubject<List<Teabag>> by lazy {
-        PublishSubject.create<List<Teabag>>()
+    private val teaBagDbPublisher: PublishSubject<List<TeaBag>> by lazy {
+        PublishSubject.create<List<TeaBag>>()
     }
 
     init {
@@ -73,7 +73,7 @@ class TeaService(private val db: TeaDb): CoroutineService {
         db.invalidationTracker.addObserver(teabagDbObserver)
         db.invalidationTracker.addObserver(timeStateDbObserver)
 
-        rxSubs.add(teabagDbPublisher.subscribeAndLogE {
+        rxSubs.add(teaBagDbPublisher.subscribeAndLogE {
             allTeaBags = it
         })
 
@@ -99,7 +99,7 @@ class TeaService(private val db: TeaDb): CoroutineService {
 
     private fun getTeabagsFromDb(){
         launch {
-            allTeaBags = db.teabagDao().allTeabags
+            allTeaBags = db.teabagDao().allTeaBags
         }
     }
 
@@ -117,9 +117,9 @@ class TeaService(private val db: TeaDb): CoroutineService {
         }
     }
 
-    fun saveTeabags(teabags: List<Teabag>) {
+    fun saveTeabags(teaBags: List<TeaBag>) {
         launch {
-            teabags.forEach {
+            teaBags.forEach {
                 db.teabagDao().insert(it)
             }
         }
@@ -151,9 +151,9 @@ class TeaService(private val db: TeaDb): CoroutineService {
                 override fun onComplete(task: Task<QuerySnapshot>) {
                     if (task.isSuccessful() && task.getResult() != null) {
 
-                        val nuTeaBags = mutableListOf<Teabag>()
+                        val nuTeaBags = mutableListOf<TeaBag>()
                         for (document in task.getResult()!!) {
-                            nuTeaBags.add(Teabag(
+                            nuTeaBags.add(TeaBag(
                                 id = document.id,
                                 title = document.getString(FirestoreConstants.FIELD_TITLE) ?: "",
                                 message = document.getString(FirestoreConstants.FIELD_MESSAGE) ?: "",

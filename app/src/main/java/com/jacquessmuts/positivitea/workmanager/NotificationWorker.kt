@@ -26,4 +26,8 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters)
 
         return Result.success()
     }
+
+    override fun onStopped() {
+        super.onStopped()
+    }
 }

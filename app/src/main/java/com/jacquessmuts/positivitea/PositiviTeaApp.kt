@@ -24,7 +24,7 @@ class PositiviTeaApp: Application(), KodeinAware {
         bind<Context>() with instance(applicationContext)
         bind<TeaDb>() with singleton { TeaDb.initDb(applicationContext) }
         bind<TeaService>() with eagerSingleton{ TeaService(instance()) }
-        bind<NotificationService>() with singleton { NotificationService(applicationContext, instance()) }
+        bind<NotificationService>() with singleton { NotificationService(applicationContext, instance(), instance()) }
     }
 
     override fun onCreate() {

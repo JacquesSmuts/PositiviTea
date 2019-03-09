@@ -2,7 +2,7 @@ package com.jacquessmuts.positivitea.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.jacquessmuts.positivitea.model.Teabag.Companion.TEABAG_TABLE
+import com.jacquessmuts.positivitea.model.TeaBag.Companion.TEABAG_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06
@@ -12,7 +12,7 @@ import com.jacquessmuts.positivitea.model.Teabag.Companion.TEABAG_TABLE
  * a migration.
  */
 @Entity(tableName = TEABAG_TABLE)
-data class Teabag(@PrimaryKey val id: String,
+data class TeaBag(@PrimaryKey val id: String,
                   val title: String,
                   val message: String,
                   val score: Long) {

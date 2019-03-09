@@ -4,18 +4,23 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.jacquessmuts.positivitea.model.Teabag
+import androidx.room.TypeConverters
+import com.jacquessmuts.positivitea.model.TeaBag
+import com.jacquessmuts.positivitea.model.TeaPreferences
 import com.jacquessmuts.positivitea.model.TimeState
 
 @Database(
-    entities = [Teabag::class, TimeState::class],
+    entities = [TeaBag::class, TimeState::class, TeaPreferences::class],
     exportSchema = false,
     version = 1)
+@TypeConverters(Converters::class)
 abstract class TeaDb : RoomDatabase() {
 
     abstract fun teabagDao(): TeabagDao
 
     abstract fun timeStateDao(): TimeStateDao
+
+    abstract fun teaPreferencesDao(): TeaPreferencesDao
 
     companion object {
 

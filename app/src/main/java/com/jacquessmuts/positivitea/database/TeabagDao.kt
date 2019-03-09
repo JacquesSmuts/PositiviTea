@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.jacquessmuts.positivitea.model.Teabag
-import com.jacquessmuts.positivitea.model.Teabag.Companion.TEABAG_TABLE
+import com.jacquessmuts.positivitea.model.TeaBag
+import com.jacquessmuts.positivitea.model.TeaBag.Companion.TEABAG_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06
@@ -15,10 +15,10 @@ import com.jacquessmuts.positivitea.model.Teabag.Companion.TEABAG_TABLE
 interface TeabagDao {
 
     @get:Query("SELECT * from $TEABAG_TABLE ORDER BY score DESC")
-    val allTeabags: List<Teabag>
+    val allTeaBags: List<TeaBag>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(teabag: Teabag)
+    fun insert(teaBag: TeaBag)
 
     @Query("DELETE FROM $TEABAG_TABLE")
     fun deleteAll()

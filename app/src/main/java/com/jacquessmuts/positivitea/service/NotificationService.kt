@@ -6,18 +6,22 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.work.Constraints
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.database.TeaDb
+import com.jacquessmuts.positivitea.database.TeaPreferencesDbObserver
+import com.jacquessmuts.positivitea.database.TimeStateDbObserver
 import com.jacquessmuts.positivitea.model.TeaPreferences
-import com.jacquessmuts.positivitea.model.Teabag
+import com.jacquessmuts.positivitea.model.TeaBag
+import com.jacquessmuts.positivitea.model.TeaStrength
+import com.jacquessmuts.positivitea.model.TimeState
+import com.jacquessmuts.positivitea.model.getWaitTimeInSeconds
 import com.jacquessmuts.positivitea.util.ConversionUtils
 import com.jacquessmuts.positivitea.workmanager.NotificationWorker
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.activity_main.view.*
+import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -31,6 +35,7 @@ import kotlin.random.Random
  * This service schedules notifications, and schedules itself to wake up to schedule more notifications
  */
 class NotificationService(private val context: Context,
+                          private val teaDb: TeaDb,
                           private val teaService: TeaService): CoroutineService {
 
     companion object {
@@ -44,7 +49,15 @@ class NotificationService(private val context: Context,
 
     var teaPreferences: TeaPreferences = TeaPreferences()
 
+    private val teaPreferencesPublisher: PublishSubject<TeaPreferences> by lazy {
+        PublishSubject.create<TeaPreferences>()
+    }
+    val teaPreferencesObservable: Observable<TeaPreferences>
+        get() = teaPreferencesPublisher.hide()
+
     init {
+        loadPreferences()
+
         //TODO: do this slightly less often
         createNotificationChannel()
     }
@@ -64,6 +77,49 @@ class NotificationService(private val context: Context,
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    fun loadPreferences() {
+        launch{
+            val loadedTeaPreferences: TeaPreferences? = teaDb.teaPreferencesDao().teaPreferences
+            if (loadedTeaPreferences == null) {
+                teaPreferences = TeaPreferences()
+            } else {
+                teaPreferences = loadedTeaPreferences
+            }
+            teaPreferencesPublisher.onNext(teaPreferences)
+        }
+    }
+
+    fun updateTeaStrength(nuStrength: TeaStrength){
+
+        teaPreferences = teaPreferences.copy(teaStrength = nuStrength)
+        launch {
+            teaDb.teaPreferencesDao().insert(teaPreferences)
+        }
+
+    }
+
+    fun scheduleNextNotification() {
+
+        val delay = ConversionUtils.getRandomizedTime(teaPreferences.teaStrength.getWaitTimeInSeconds())
+        Timber.d("scheduling next notification, with time $delay")
+
+        launch {
+
+            // First check if there isn't already a notification scheduled. If so, cancel it.
+            //TODO: this breaks the future requests as well :/ WorkManager.getInstance().getWorkInfosByTag(WORKER_TAG).cancel(false)
+
+
+            val notificationWorkRequest =
+                OneTimeWorkRequestBuilder<NotificationWorker>()
+                    .setInitialDelay(delay, TimeUnit.SECONDS)
+                    .addTag(WORKER_TAG)
+                    .build()
+
+            WorkManager.getInstance().enqueue(notificationWorkRequest)
+        }
+
     }
 
     fun showRandomNotification() {
@@ -86,38 +142,21 @@ class NotificationService(private val context: Context,
         }
     }
 
-
-    fun scheduleNextNotification() {
-
-        Timber.d("scheduling next notification")
-
-        // First check if there isn't already a notification scheduled. If so, cancel it.
-        WorkManager.getInstance().getWorkInfosByTag(WORKER_TAG).cancel(false)
-
-        val notificationWorkRequest =
-            OneTimeWorkRequestBuilder<NotificationWorker>()
-                .setInitialDelay(ConversionUtils.getRandomizedTime(60), TimeUnit.SECONDS)
-                .addTag(WORKER_TAG)
-                .build()
-
-        WorkManager.getInstance().enqueue(notificationWorkRequest)
-    }
-
-    private fun showNotification(teabag: Teabag) {
-        Timber.d("Showing notification $teabag")
+    private fun showNotification(teaBag: TeaBag) {
+        Timber.d("Showing notification $teaBag")
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_name)
-            .setContentTitle(teabag.title)
-            .setContentText(teabag.message)
+            .setContentTitle(teaBag.title)
+            .setContentText(teaBag.message)
             .setStyle(NotificationCompat.BigTextStyle()
-                .bigText(teabag.message))
+                .bigText(teaBag.message))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .build()
 
         with(NotificationManagerCompat.from(context)) {
             var notificationId = 0
-            teabag.id.forEach {
+            teaBag.id.forEach {
                 notificationId += it.toInt()
             }
             notify(notificationId, notification)

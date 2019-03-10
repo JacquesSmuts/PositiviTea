@@ -2,13 +2,16 @@ package com.jacquessmuts.positivitea.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.jacquessmuts.positivitea.MainActivity
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.database.TeaDb
 import com.jacquessmuts.positivitea.database.TeaPreferencesDbObserver
@@ -159,9 +162,9 @@ class NotificationService(private val context: Context,
 
         launch {
 
-            if (teaService.allTeaBags.isEmpty()){
-                // find a better way to wait for the list to be finished loaded
-                delay(2000)
+            while (teaService.allTeaBags.isEmpty()){
+                Timber.w("Waiting for teabags to be loaded from server/db")
+                delay(1000)
             }
 
             val teabagNumber = teaService.allTeaBags.size
@@ -174,7 +177,14 @@ class NotificationService(private val context: Context,
     }
 
     private fun showNotification(teaBag: TeaBag) {
-        Timber.d("Showing notification $teaBag")
+        Timber.d("Showing notification for $teaBag")
+
+        // Create an explicit intent for an Activity in your app
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_name)
             .setContentTitle(teaBag.title)
@@ -182,6 +192,7 @@ class NotificationService(private val context: Context,
             .setStyle(NotificationCompat.BigTextStyle()
                 .bigText(teaBag.message))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 

@@ -44,6 +44,11 @@ class MainActivity : AppCompatActivity(), KodeinAware {
             textViewRegularity.setText(it.getDescription(baseContext))
         }
 
+        rxSubs.add(teaService.teabagObservable.subscribeAndLogE {
+            Timber.i("teabags updated with ${teaService.allTeaBags.size} teabags")
+            // Keep this here as the teaService clears itself if it is not being observed
+        })
+
         rxSubs.add(notificationService.teaPreferencesObservable
             .subscribeAndLogE {
                 seekbar.setProgress(it.teaStrength.strength)

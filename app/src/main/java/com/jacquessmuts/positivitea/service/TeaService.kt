@@ -18,6 +18,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by jacquessmuts on 2019-03-06
@@ -30,6 +32,12 @@ class TeaService(private val db: TeaDb): CoroutineService {
     private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
 
     var timeState: TimeState? = null
+        set(value) {
+            if (value != field) {
+                field = value
+                saveTimeState()
+            }
+        }
 
     private val timeStateDbObserver by lazy {
         TimeStateDbObserver(
@@ -66,9 +74,11 @@ class TeaService(private val db: TeaDb): CoroutineService {
     init {
         Timber.i("initializing TeaService")
 
-        getTimeStateFromDb()
-        getTeabagsFromDb()
-        getTeabagsFromServer()
+        launch {
+            loadTimeState()
+            getTeabagsFromDb()
+            getTeabagsFromServer()
+        }
 
         db.invalidationTracker.addObserver(teabagDbObserver)
         db.invalidationTracker.addObserver(timeStateDbObserver)
@@ -97,15 +107,10 @@ class TeaService(private val db: TeaDb): CoroutineService {
             })
     }
 
-    private fun getTeabagsFromDb(){
-        launch {
+    private suspend fun getTeabagsFromDb(){
+        suspendCoroutine<Boolean> { continuation ->
             allTeaBags = db.teabagDao().allTeaBags
-        }
-    }
-
-    private fun getTimeStateFromDb(){
-        launch {
-            timeState = db.timeStateDao().timeState
+            continuation.resume(allTeaBags.isEmpty())
         }
     }
 
@@ -114,6 +119,14 @@ class TeaService(private val db: TeaDb): CoroutineService {
             launch {
                 db.timeStateDao().insert(it)
             }
+        }
+    }
+
+    private suspend fun loadTimeState(){
+        suspendCoroutine<Boolean> { continuation ->
+            val nuTimeState: TimeState? = db.timeStateDao().timeState
+            timeState = nuTimeState ?: TimeState(timeTeabagsUpdated = 0)
+            continuation.resume(true)
         }
     }
 
@@ -133,44 +146,50 @@ class TeaService(private val db: TeaDb): CoroutineService {
         db.invalidationTracker.removeObserver(timeStateDbObserver)
     }
 
-    fun getTeabagsFromServer(forceLoad: Boolean = false) {
+    /**
+     *
+     */
+    suspend fun getTeabagsFromServer(forceLoad: Boolean = false) {
 
         Timber.v("Considering getting teabags from server")
 
-        // There might be a race condition here where timeState could be null on first startup
-        if (!(timeState?.canMakeNewApiCall != false || forceLoad))
+        // There might be a race condition here where timeState could be null on first startup, hence == true
+        if (!(timeState?.canMakeNewApiCall == true || forceLoad))
             return
 
         Timber.d("Getting teabags from server")
 
         val firestore = FirebaseFirestore.getInstance()
 
-        firestore.collection(FirestoreConstants.COLLECTION_TEABAGS)
-            .get()
-            .addOnCompleteListener(object : OnCompleteListener<QuerySnapshot> {
-                override fun onComplete(task: Task<QuerySnapshot>) {
-                    if (task.isSuccessful() && task.getResult() != null) {
+        suspendCoroutine<Boolean> { continuation ->
+            firestore.collection(FirestoreConstants.COLLECTION_TEABAGS)
+                .get()
+                .addOnCompleteListener(object : OnCompleteListener<QuerySnapshot> {
+                    override fun onComplete(task: Task<QuerySnapshot>) {
+                        if (task.isSuccessful() && task.getResult() != null) {
 
-                        val nuTeaBags = mutableListOf<TeaBag>()
-                        for (document in task.getResult()!!) {
-                            nuTeaBags.add(TeaBag(
-                                id = document.id,
-                                title = document.getString(FirestoreConstants.FIELD_TITLE) ?: "",
-                                message = document.getString(FirestoreConstants.FIELD_MESSAGE) ?: "",
-                                score = document.getLong(FirestoreConstants.FIELD_SCORE) ?: 0))
+                            val nuTeaBags = mutableListOf<TeaBag>()
+                            for (document in task.getResult()!!) {
+                                nuTeaBags.add(TeaBag(
+                                    id = document.id,
+                                    title = document.getString(FirestoreConstants.FIELD_TITLE) ?: "",
+                                    message = document.getString(FirestoreConstants.FIELD_MESSAGE) ?: "",
+                                    score = document.getLong(FirestoreConstants.FIELD_SCORE) ?: 0))
+                            }
+
+                            saveTeabags(nuTeaBags)
+                            timeState = TimeState(timeTeabagsUpdated = System.currentTimeMillis())
+                            Timber.i("A total of ${nuTeaBags.size} Teabags downloaded")
+                            continuation.resume(true)
+                        } else {
+                            Timber.e("Error getting documents. ${task.exception}")
+                            continuation.resume(false)
                         }
-
-                        saveTeabags(nuTeaBags)
-                        timeState = TimeState(timeTeabagsUpdated = System.currentTimeMillis())
-                        saveTimeState()
-                        Timber.i("A total of ${nuTeaBags.size} Teabags downloaded")
-
-                    } else {
-                        Timber.e("Error getting documents. ${task.exception}")
                     }
-                }
 
-            })
+                })
+        }
+
     }
 
 }

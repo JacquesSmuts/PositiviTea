@@ -88,7 +88,6 @@ class NotificationService(private val context: Context,
 
     fun loadPreferences() {
         launch{
-            // TODO: This is a very short process but it could still result in a race-condition when accessing teaPreferences elsewhere.
             val loadedTeaPreferences: TeaPreferences? = teaDb.teaPreferencesDao().teaPreferences
             if (loadedTeaPreferences == null) {
                 teaPreferences = TeaPreferences()

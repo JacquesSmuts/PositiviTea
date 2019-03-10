@@ -12,12 +12,12 @@ import java.util.*
  */
 @Entity(tableName = PREFERENCES_TABLE)
 data class TeaPreferences(@PrimaryKey val id: Int = ID,
-                     val teaStrength: TeaStrength = TeaStrength()) {
+                          val teaStrength: TeaStrength = TeaStrength(),
+                          val previousStrength: TeaStrength = teaStrength) {
 
     companion object {
         const val ID = 1600
         const val PREFERENCES_TABLE = "preferences_table"
     }
-
 
 }

@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity(), KodeinAware {
     val teaService: TeaService by instance()
     val notificationService: NotificationService by instance()
     val teaStrength
-        get() = notificationService.teaPreferences.teaStrength
+        get() = notificationService.teaPreferences?.teaStrength
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,25 +40,30 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         val seekbar = findViewById<SeekBar>(R.id.seekBar)
         val textViewRegularity = findViewById<TextView>(R.id.textViewRegularity)
 
-        seekbar.setProgress(teaStrength.strength)
-        textViewRegularity.setText(teaStrength.getDescription(baseContext))
+        teaStrength?.let {
+            seekbar.setProgress(it.strength)
+            textViewRegularity.setText(it.getDescription(baseContext))
+        }
 
         rxSubs.add(notificationService.teaPreferencesObservable
             .subscribeAndLogE {
-                seekbar.setProgress(teaStrength.strength)
-                textViewRegularity.setText(teaStrength.getDescription(baseContext))
+                seekbar.setProgress(it.teaStrength.strength)
+                textViewRegularity.setText(it.teaStrength.getDescription(baseContext))
             })
 
         rxSubs.add(RxSeekBar.changes(seekbar)
             .skip(2)
-            .filter { input ->
-                Math.abs(input - teaStrength.strength) > 20
+            .map { input ->
+                val nuStrength = TeaStrength(input)
+                textViewRegularity.setText(nuStrength.getDescription(baseContext))
+                nuStrength
             }
-            .map { input -> TeaStrength(input) }
+            .filter { input ->
+                Math.abs(input.strength - (teaStrength?.strength ?: input.strength)) > 10
+            }
+            .throttleLast(2, TimeUnit.SECONDS)
             .subscribeAndLogE { teaStrength ->
                 Timber.d("user adjusted strength to $teaStrength")
-
-                textViewRegularity.text = teaStrength.getDescription(baseContext)
 
                 notificationService.updateTeaStrength(teaStrength)
                 notificationService.scheduleNextNotification()

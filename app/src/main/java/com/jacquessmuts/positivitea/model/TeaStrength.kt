@@ -29,7 +29,7 @@ data class TeaStrength(val strength: Int = DEFAULT_STRENGTH) {
 fun TeaStrength.getWaitTimeInSeconds(): Long {
 
     return when (strength) {
-        in 1000 downTo 991 -> 10 // 10 sec
+        in 1000 downTo 991 -> 4 // 4 sec
         in 990 downTo 901 -> 5*60 // 5min
         in 900 downTo 801 -> 10*60 // 10min
         in 800 downTo 701  -> 30*60 // 30min

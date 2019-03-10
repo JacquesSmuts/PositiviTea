@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.jacquessmuts.positivitea.R
@@ -47,7 +48,13 @@ class NotificationService(private val context: Context,
 
     private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
 
-    var teaPreferences: TeaPreferences = TeaPreferences()
+    var teaPreferences: TeaPreferences? = null
+        set(nuPreferences) {
+            field = nuPreferences
+            if (nuPreferences != null) {
+                teaPreferencesPublisher.onNext(nuPreferences)
+            }
+        }
 
     private val teaPreferencesPublisher: PublishSubject<TeaPreferences> by lazy {
         PublishSubject.create<TeaPreferences>()
@@ -81,44 +88,69 @@ class NotificationService(private val context: Context,
 
     fun loadPreferences() {
         launch{
+            // TODO: This is a very short process but it could still result in a race-condition when accessing teaPreferences elsewhere.
             val loadedTeaPreferences: TeaPreferences? = teaDb.teaPreferencesDao().teaPreferences
             if (loadedTeaPreferences == null) {
                 teaPreferences = TeaPreferences()
             } else {
                 teaPreferences = loadedTeaPreferences
             }
-            teaPreferencesPublisher.onNext(teaPreferences)
         }
     }
 
     fun updateTeaStrength(nuStrength: TeaStrength){
 
-        teaPreferences = teaPreferences.copy(teaStrength = nuStrength)
+        val preferences = teaPreferences ?: TeaPreferences()
+
+        val oldStrength = preferences.teaStrength
+        teaPreferences = preferences.copy(teaStrength = nuStrength, previousStrength = oldStrength)
+        Timber.d("Saving teaPreferences as $teaPreferences")
+
         launch {
-            teaDb.teaPreferencesDao().insert(teaPreferences)
+            teaPreferences?.let {
+                teaDb.teaPreferencesDao().insert(it)
+            }
         }
 
     }
 
     fun scheduleNextNotification() {
 
-        val delay = ConversionUtils.getRandomizedTime(teaPreferences.teaStrength.getWaitTimeInSeconds())
-        Timber.d("scheduling next notification, with time $delay")
-
         launch {
 
-            // First check if there isn't already a notification scheduled. If so, cancel it.
-            //TODO: this breaks the future requests as well :/ WorkManager.getInstance().getWorkInfosByTag(WORKER_TAG).cancel(false)
+            while (teaPreferences == null) {
+                delay(10)
+                Timber.w("delaying notification service by 10ms because of a race condition")
+            }
+            if (teaPreferences == null)
+                throw IllegalStateException("How did this even happen?")
 
+            val preferences = teaPreferences!!
+
+            val oldTag = "$WORKER_TAG ${preferences.previousStrength.strength}"
+            val tag = "$WORKER_TAG ${preferences.teaStrength.strength}"
+            val delay = ConversionUtils.getRandomizedTime(preferences.teaStrength.getWaitTimeInSeconds())
+            Timber.d("scheduling next notification; oldTag $tag, \ntag $tag, \ntime $delay")
+
+            if (tag != oldTag) {
+                // Cancel the previously scheduled notification
+                WorkManager.getInstance().cancelAllWorkByTag(oldTag)
+            }
 
             val notificationWorkRequest =
                 OneTimeWorkRequestBuilder<NotificationWorker>()
                     .setInitialDelay(delay, TimeUnit.SECONDS)
-                    .addTag(WORKER_TAG)
+                    .addTag(tag)
                     .build()
 
-            WorkManager.getInstance().enqueue(notificationWorkRequest)
+            // enqueueUniqueWork guarantees that identical work is not overwritten or doubled upon
+            WorkManager.getInstance().enqueueUniqueWork(
+                tag,
+                ExistingWorkPolicy.KEEP,
+                notificationWorkRequest)
+
         }
+
 
     }
 

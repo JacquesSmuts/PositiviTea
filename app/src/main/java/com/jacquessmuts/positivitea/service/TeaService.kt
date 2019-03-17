@@ -105,6 +105,7 @@ class TeaService(private val db: TeaDb): CoroutineService {
             .subscribeAndLogE {
                 clear()
             })
+
     }
 
     private suspend fun getTeabagsFromDb(){

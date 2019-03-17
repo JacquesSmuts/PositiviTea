@@ -16,7 +16,7 @@ data class TimeState(@PrimaryKey val id: Int = ID,
     companion object {
         const val ID = 451
         const val TIMESTATE_TABLE = "timestate_table"
-        const val MINIMUM_TIME_SINCE_TEA_UPDATE = 24 * 60 * 60 * 1000 // 24 hours
+        const val MINIMUM_TIME_SINCE_TEA_UPDATE = 178 * 60 * 60 * 1000 // 1 week
 
     }
 

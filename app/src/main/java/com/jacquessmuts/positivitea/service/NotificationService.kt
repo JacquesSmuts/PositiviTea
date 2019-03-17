@@ -164,7 +164,7 @@ class NotificationService(private val context: Context,
 
             while (teaService.allTeaBags.isEmpty()){
                 Timber.w("Waiting for teabags to be loaded from server/db")
-                delay(1000)
+                delay(100)
             }
 
             val teabagNumber = teaService.allTeaBags.size

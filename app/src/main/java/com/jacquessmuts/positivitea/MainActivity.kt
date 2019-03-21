@@ -80,5 +80,4 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         rxSubs.clear()
         super.onPause()
     }
-
 }

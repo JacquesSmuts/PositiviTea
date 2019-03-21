@@ -14,12 +14,9 @@ import androidx.work.WorkManager
 import com.jacquessmuts.positivitea.MainActivity
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.database.TeaDb
-import com.jacquessmuts.positivitea.database.TeaPreferencesDbObserver
-import com.jacquessmuts.positivitea.database.TimeStateDbObserver
-import com.jacquessmuts.positivitea.model.TeaPreferences
 import com.jacquessmuts.positivitea.model.TeaBag
+import com.jacquessmuts.positivitea.model.TeaPreferences
 import com.jacquessmuts.positivitea.model.TeaStrength
-import com.jacquessmuts.positivitea.model.TimeState
 import com.jacquessmuts.positivitea.model.getWaitTimeInSeconds
 import com.jacquessmuts.positivitea.util.ConversionUtils
 import com.jacquessmuts.positivitea.workmanager.NotificationWorker
@@ -38,9 +35,11 @@ import kotlin.random.Random
  * Created by jacquessmuts on 2019-03-07
  * This service schedules notifications, and schedules itself to wake up to schedule more notifications
  */
-class NotificationService(private val context: Context,
-                          private val teaDb: TeaDb,
-                          private val teaService: TeaService): CoroutineService {
+class NotificationService(
+    private val context: Context,
+    private val teaDb: TeaDb,
+    private val teaService: TeaService
+) : CoroutineService {
 
     companion object {
         const val CHANNEL_ID = "111"
@@ -68,7 +67,7 @@ class NotificationService(private val context: Context,
     init {
         loadPreferences()
 
-        //TODO: do this slightly less often
+        // TODO: do this slightly less often
         createNotificationChannel()
     }
 
@@ -90,7 +89,7 @@ class NotificationService(private val context: Context,
     }
 
     fun loadPreferences() {
-        launch{
+        launch {
             val loadedTeaPreferences: TeaPreferences? = teaDb.teaPreferencesDao().teaPreferences
             if (loadedTeaPreferences == null) {
                 teaPreferences = TeaPreferences()
@@ -100,7 +99,7 @@ class NotificationService(private val context: Context,
         }
     }
 
-    fun updateTeaStrength(nuStrength: TeaStrength){
+    fun updateTeaStrength(nuStrength: TeaStrength) {
 
         val preferences = teaPreferences ?: TeaPreferences()
 
@@ -113,7 +112,6 @@ class NotificationService(private val context: Context,
                 teaDb.teaPreferencesDao().insert(it)
             }
         }
-
     }
 
     fun scheduleNextNotification() {
@@ -150,10 +148,7 @@ class NotificationService(private val context: Context,
                 tag,
                 ExistingWorkPolicy.KEEP,
                 notificationWorkRequest)
-
         }
-
-
     }
 
     fun showRandomNotification() {
@@ -162,7 +157,7 @@ class NotificationService(private val context: Context,
 
         launch {
 
-            while (teaService.allTeaBags.isEmpty()){
+            while (teaService.allTeaBags.isEmpty()) {
                 Timber.w("Waiting for teabags to be loaded from server/db")
                 delay(100)
             }
@@ -209,5 +204,4 @@ class NotificationService(private val context: Context,
         clearJobs()
         rxSubs.dispose()
     }
-
 }

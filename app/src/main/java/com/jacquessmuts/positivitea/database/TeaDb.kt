@@ -33,8 +33,5 @@ abstract class TeaDb : RoomDatabase() {
                 DATABASE_NAME)
                 .build()
         }
-
     }
-
-
 }

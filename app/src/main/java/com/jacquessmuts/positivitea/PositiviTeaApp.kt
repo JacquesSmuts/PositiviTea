@@ -17,13 +17,13 @@ import timber.log.Timber
  * Created by jacquessmuts on 2018/10/05
  * The app.
  */
-class PositiviTeaApp: Application(), KodeinAware {
+class PositiviTeaApp : Application(), KodeinAware {
 
     override val kodein by Kodein.lazy {
         bind<Application>() with instance(this@PositiviTeaApp)
         bind<Context>() with instance(applicationContext)
         bind<TeaDb>() with singleton { TeaDb.initDb(applicationContext) }
-        bind<TeaService>() with eagerSingleton{ TeaService(instance()) }
+        bind<TeaService>() with eagerSingleton { TeaService(instance()) }
         bind<NotificationService>() with singleton { NotificationService(applicationContext, instance(), instance()) }
     }
 

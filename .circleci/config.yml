@@ -9,7 +9,7 @@ jobs:
     steps:
       - checkout
       # Decode the google-services.json file from the environment variables and save in environment
-      - run: echo $ENCODED_GOOGLE_SERVICE_JSON | base64 --decode > ~/${HOME}/app/google-services.json
+      - run: echo $ENCODED_GOOGLE_SERVICE_JSON | base64 --decode > app/google-services.json
       - restore_cache:
           key: gradle-{{ checksum "build.gradle" }}
       - run:

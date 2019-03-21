@@ -1,16 +1,17 @@
 package com.jacquessmuts.positivitea
 
 import android.os.Bundle
-import android.widget.SeekBar
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.jacquessmuts.positivitea.model.TeaStrength
 import com.jacquessmuts.positivitea.model.getDescription
 import com.jacquessmuts.positivitea.service.NotificationService
-import com.jacquessmuts.positivitea.service.TeaService
 import com.jacquessmuts.positivitea.util.subscribeAndLogE
+import com.jacquessmuts.positivitea.viewmodel.MainViewModel
 import com.jakewharton.rxbinding2.widget.RxSeekBar
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.activity_main.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import timber.log.Timber
@@ -18,58 +19,56 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), KodeinAware {
 
-    protected val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
+    private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
 
     override val kodein by org.kodein.di.android.kodein()
 
-    val teaService: TeaService by instance()
-    val notificationService: NotificationService by instance()
-    val teaStrength
-        get() = notificationService.teaPreferences?.teaStrength
+    private lateinit var mainViewModel: MainViewModel
+
+    private val notificationService: NotificationService by instance()
+
+    // val seekbar = findViewById<SeekBar>(R.id.seekBar)
+    // val textViewRegularity = findViewById<TextView>(R.id.textViewRegularity)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Timber.d("OnCreate of MainActivity")
         setContentView(R.layout.activity_main)
+
+        linkViewModel()
+    }
+
+    private fun linkViewModel() {
+
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+
+        mainViewModel.allTeaBags.observe(this, Observer {
+            // Update the cached copy of the words in the adapter.
+            // /teabags.let { adapter.setWords(it) }
+        })
+
+        mainViewModel.teaPreferences.observe(this, Observer { preferences ->
+            seekBar.progress = preferences.teaStrength.strength
+            textViewRegularity.text = preferences.teaStrength.getDescription(baseContext)
+        })
     }
 
     override fun onStart() {
         super.onStart()
-        Timber.i("started with ${teaService.allTeaBags.size}")
+        Timber.i("started with ${mainViewModel.allTeaBags.value?.size} teabags")
 
-        val seekbar = findViewById<SeekBar>(R.id.seekBar)
-        val textViewRegularity = findViewById<TextView>(R.id.textViewRegularity)
-
-        teaStrength?.let {
-            seekbar.setProgress(it.strength)
-            textViewRegularity.setText(it.getDescription(baseContext))
-        }
-
-        rxSubs.add(teaService.teabagObservable.subscribeAndLogE {
-            Timber.i("teabags updated with ${teaService.allTeaBags.size} teabags")
-            // Keep this here as the teaService clears itself if it is not being observed
-        })
-
-        rxSubs.add(notificationService.teaPreferencesObservable
-            .subscribeAndLogE {
-                seekbar.setProgress(it.teaStrength.strength)
-                textViewRegularity.setText(it.teaStrength.getDescription(baseContext))
-            })
-
-        rxSubs.add(RxSeekBar.changes(seekbar)
+        rxSubs.add(RxSeekBar.changes(seekBar)
             .skip(2)
             .map { input ->
                 val nuStrength = TeaStrength(input)
-                textViewRegularity.setText(nuStrength.getDescription(baseContext))
+                textViewRegularity.text = nuStrength.getDescription(baseContext)
                 nuStrength
             }
-            .filter { input ->
-                Math.abs(input.strength - (teaStrength?.strength ?: input.strength)) > 10
-            }
-            .throttleLast(2, TimeUnit.SECONDS)
-            .subscribeAndLogE { teaStrength ->
-                Timber.d("user adjusted strength to $teaStrength")
+            .throttleLast(1, TimeUnit.SECONDS)
+            .subscribeAndLogE { nuTeaStrength ->
+                Timber.d("user adjusted strength to $nuTeaStrength")
 
-                notificationService.updateTeaStrength(teaStrength)
+                notificationService.updateTeaStrength(nuTeaStrength)
                 notificationService.scheduleNextNotification()
         })
 

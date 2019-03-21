@@ -1,10 +1,7 @@
 package com.jacquessmuts.positivitea.service
 
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import com.jacquessmuts.positivitea.database.TeaDb
+import com.jacquessmuts.positivitea.database.TeaDatabase
 import com.jacquessmuts.positivitea.database.TeabagDbObserver
 import com.jacquessmuts.positivitea.database.TimeStateDbObserver
 import com.jacquessmuts.positivitea.firestore.FirestoreConstants
@@ -23,15 +20,15 @@ import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by jacquessmuts on 2019-03-06
- * This repository/service handles DB calls, manages the db and exposes db items to the app
+ * This repository/service handles DB calls, manages the teaDb and exposes teaDb items to the app
  */
-class TeaService(private val db: TeaDb) : CoroutineService {
+class TeaRepository(private val teaDb: TeaDatabase) : CoroutineService {
 
     override val job by lazy { SupervisorJob() }
 
     private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
 
-    var timeState: TimeState? = null
+    private var timeState: TimeState? = null
         set(value) {
             if (value != field) {
                 field = value
@@ -41,13 +38,16 @@ class TeaService(private val db: TeaDb) : CoroutineService {
 
     private val timeStateDbObserver by lazy {
         TimeStateDbObserver(
-            db.timeStateDao(),
+            teaDb.timeStateDao(),
             timeStateDbPublisher
         )
     }
     private val timeStateDbPublisher: PublishSubject<TimeState> by lazy {
         PublishSubject.create<TimeState>()
     }
+
+    val liveTeaBags = teaDb.teabagDao().liveAllTeaBags
+    val liveTeaPreferences = teaDb.teaPreferencesDao().liveTeaPreferences
 
     var allTeaBags: List<TeaBag> = listOf()
         private set(nuTeabags) {
@@ -63,7 +63,7 @@ class TeaService(private val db: TeaDb) : CoroutineService {
 
     private val teabagDbObserver by lazy {
         TeabagDbObserver(
-            db.teabagDao(),
+            teaDb.teabagDao(),
             teaBagDbPublisher
         )
     }
@@ -72,7 +72,7 @@ class TeaService(private val db: TeaDb) : CoroutineService {
     }
 
     init {
-        Timber.i("initializing TeaService")
+        Timber.i("initializing TeaRepository")
 
         launch {
             loadTimeState()
@@ -80,8 +80,8 @@ class TeaService(private val db: TeaDb) : CoroutineService {
             getTeabagsFromServer()
         }
 
-        db.invalidationTracker.addObserver(teabagDbObserver)
-        db.invalidationTracker.addObserver(timeStateDbObserver)
+        teaDb.invalidationTracker.addObserver(teabagDbObserver)
+        teaDb.invalidationTracker.addObserver(timeStateDbObserver)
 
         rxSubs.add(teaBagDbPublisher.subscribeAndLogE {
             allTeaBags = it
@@ -93,12 +93,12 @@ class TeaService(private val db: TeaDb) : CoroutineService {
 
         // If nothing is listening to this service for 10 seconds, twice in a row, go to sleep
         rxSubs.add(Observable.interval(10, TimeUnit.SECONDS)
-            .map { teabagPublisher.hasObservers() }
+            .map { liveTeaBags.hasObservers() }
             .buffer(2)
             .filter {
                 var isObserved = true
-                it.forEach {
-                    isObserved = isObserved && it
+                it.forEach { hasObservers ->
+                    isObserved = isObserved && hasObservers
                 }
                 !isObserved
             }
@@ -109,31 +109,31 @@ class TeaService(private val db: TeaDb) : CoroutineService {
 
     private suspend fun getTeabagsFromDb() {
         suspendCoroutine<Boolean> { continuation ->
-            allTeaBags = db.teabagDao().allTeaBags
+            allTeaBags = teaDb.teabagDao().allTeaBags
             continuation.resume(allTeaBags.isEmpty())
         }
     }
 
-    fun saveTimeState() {
+    private fun saveTimeState() {
         timeState?.let {
             launch {
-                db.timeStateDao().insert(it)
+                teaDb.timeStateDao().insert(it)
             }
         }
     }
 
     private suspend fun loadTimeState() {
         suspendCoroutine<Boolean> { continuation ->
-            val nuTimeState: TimeState? = db.timeStateDao().timeState
+            val nuTimeState: TimeState? = teaDb.timeStateDao().timeState
             timeState = nuTimeState ?: TimeState(timeTeabagsUpdated = 0)
             continuation.resume(true)
         }
     }
 
-    fun saveTeabags(teaBags: List<TeaBag>) {
+    private fun saveTeabags(teaBags: List<TeaBag>) {
         launch {
             teaBags.forEach {
-                db.teabagDao().insert(it)
+                teaDb.teabagDao().insert(it)
             }
         }
     }
@@ -141,14 +141,14 @@ class TeaService(private val db: TeaDb) : CoroutineService {
     private fun clear() {
         clearJobs()
         rxSubs.dispose()
-        db.invalidationTracker.removeObserver(teabagDbObserver)
-        db.invalidationTracker.removeObserver(timeStateDbObserver)
+        teaDb.invalidationTracker.removeObserver(teabagDbObserver)
+        teaDb.invalidationTracker.removeObserver(timeStateDbObserver)
     }
 
     /**
      *
      */
-    suspend fun getTeabagsFromServer(forceLoad: Boolean = false) {
+    private suspend fun getTeabagsFromServer(forceLoad: Boolean = false) {
 
         Timber.v("Considering getting teabags from server")
 
@@ -163,29 +163,27 @@ class TeaService(private val db: TeaDb) : CoroutineService {
         suspendCoroutine<Boolean> { continuation ->
             firestore.collection(FirestoreConstants.COLLECTION_TEABAGS)
                 .get()
-                .addOnCompleteListener(object : OnCompleteListener<QuerySnapshot> {
-                    override fun onComplete(task: Task<QuerySnapshot>) {
-                        if (task.isSuccessful() && task.getResult() != null) {
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful && task.result != null) {
 
-                            val nuTeaBags = mutableListOf<TeaBag>()
-                            for (document in task.getResult()!!) {
-                                nuTeaBags.add(TeaBag(
-                                    id = document.id,
-                                    title = document.getString(FirestoreConstants.FIELD_TITLE) ?: "",
-                                    message = document.getString(FirestoreConstants.FIELD_MESSAGE) ?: "",
-                                    score = document.getLong(FirestoreConstants.FIELD_SCORE) ?: 0))
-                            }
-
-                            saveTeabags(nuTeaBags)
-                            timeState = TimeState(timeTeabagsUpdated = System.currentTimeMillis())
-                            Timber.i("A total of ${nuTeaBags.size} Teabags downloaded")
-                            continuation.resume(true)
-                        } else {
-                            Timber.e("Error getting documents. ${task.exception}")
-                            continuation.resume(false)
+                        val nuTeaBags = mutableListOf<TeaBag>()
+                        for (document in task.result!!) {
+                            nuTeaBags.add(TeaBag(
+                                id = document.id,
+                                title = document.getString(FirestoreConstants.FIELD_TITLE) ?: "",
+                                message = document.getString(FirestoreConstants.FIELD_MESSAGE) ?: "",
+                                score = document.getLong(FirestoreConstants.FIELD_SCORE) ?: 0))
                         }
+
+                        saveTeabags(nuTeaBags)
+                        timeState = TimeState(timeTeabagsUpdated = System.currentTimeMillis())
+                        Timber.i("A total of ${nuTeaBags.size} Teabags downloaded")
+                        continuation.resume(true)
+                    } else {
+                        Timber.e("Error getting documents. ${task.exception}")
+                        continuation.resume(false)
                     }
-                })
+                }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.jacquessmuts.positivitea.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -13,6 +14,9 @@ import com.jacquessmuts.positivitea.model.TeaPreferences.Companion.PREFERENCES_T
  */
 @Dao
 interface TeaPreferencesDao {
+
+    @get:Query("SELECT * from $PREFERENCES_TABLE WHERE ID = ${TeaPreferences.ID} LIMIT 1")
+    val liveTeaPreferences: LiveData<TeaPreferences>
 
     @get:Query("SELECT * from $PREFERENCES_TABLE WHERE ID = ${TeaPreferences.ID} LIMIT 1")
     val teaPreferences: TeaPreferences

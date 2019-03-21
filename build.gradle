@@ -7,14 +7,37 @@ buildscript {
         jcenter()
     }
 
-    ext {
-        kotlin_version = '1.3.21'
-        room_version = '2.1.0-alpha04'
-    }
+    ext.versions = [
+            minSdk: 21,
+            compileSdk: 28,
+            targetSdk: 28,
+            app: [
+                    code: 1,
+                    name: '0.0.1'
+            ],
+            kotlin: '1.3.21',
+            coroutines: '1.1.1',
+            kodein: '6.1.0',
+            timber: '4.7.1',
+            rx: [
+                    core: '2.2.7',
+                    android: '2.1.1',
+                    kotlin: '2.3.0',
+                    binding: '2.2.0'
+            ],
+            android: [
+                    room: '2.1.0-alpha04',
+                    lifecycle: '2.0.0'
+            ],
+            firebase: [
+                    core: '16.0.8',
+                    firestore: '18.1.0'
+            ]
+    ]
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0-alpha06'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:3.5.0-alpha07'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
         classpath 'com.google.gms:google-services:4.2.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

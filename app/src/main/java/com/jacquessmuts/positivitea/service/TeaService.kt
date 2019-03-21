@@ -25,7 +25,7 @@ import kotlin.coroutines.suspendCoroutine
  * Created by jacquessmuts on 2019-03-06
  * This repository/service handles DB calls, manages the db and exposes db items to the app
  */
-class TeaService(private val db: TeaDb): CoroutineService {
+class TeaService(private val db: TeaDb) : CoroutineService {
 
     override val job by lazy { SupervisorJob() }
 
@@ -105,10 +105,9 @@ class TeaService(private val db: TeaDb): CoroutineService {
             .subscribeAndLogE {
                 clear()
             })
-
     }
 
-    private suspend fun getTeabagsFromDb(){
+    private suspend fun getTeabagsFromDb() {
         suspendCoroutine<Boolean> { continuation ->
             allTeaBags = db.teabagDao().allTeaBags
             continuation.resume(allTeaBags.isEmpty())
@@ -123,7 +122,7 @@ class TeaService(private val db: TeaDb): CoroutineService {
         }
     }
 
-    private suspend fun loadTimeState(){
+    private suspend fun loadTimeState() {
         suspendCoroutine<Boolean> { continuation ->
             val nuTimeState: TimeState? = db.timeStateDao().timeState
             timeState = nuTimeState ?: TimeState(timeTeabagsUpdated = 0)
@@ -138,7 +137,6 @@ class TeaService(private val db: TeaDb): CoroutineService {
             }
         }
     }
-
 
     private fun clear() {
         clearJobs()
@@ -187,10 +185,7 @@ class TeaService(private val db: TeaDb): CoroutineService {
                             continuation.resume(false)
                         }
                     }
-
                 })
         }
-
     }
-
 }

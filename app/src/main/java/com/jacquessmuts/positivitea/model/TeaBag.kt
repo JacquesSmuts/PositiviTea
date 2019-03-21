@@ -12,10 +12,12 @@ import com.jacquessmuts.positivitea.model.TeaBag.Companion.TEABAG_TABLE
  * a migration.
  */
 @Entity(tableName = TEABAG_TABLE)
-data class TeaBag(@PrimaryKey val id: String,
-                  val title: String,
-                  val message: String,
-                  val score: Long) {
+data class TeaBag(
+    @PrimaryKey val id: String,
+    val title: String,
+    val message: String,
+    val score: Long
+) {
 
     companion object {
         const val TEABAG_TABLE = "teabag_table"

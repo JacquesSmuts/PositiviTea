@@ -13,10 +13,9 @@ object ConversionUtils {
      */
     fun getRandomizedTime(seconds: Long): Long {
 
-        val from: Long = seconds/2
-        val to: Long = (seconds*1.5).toLong()
+        val from: Long = seconds / 2
+        val to: Long = (seconds * 1.5).toLong()
 
         return Random.nextLong(from, to)
     }
-
 }

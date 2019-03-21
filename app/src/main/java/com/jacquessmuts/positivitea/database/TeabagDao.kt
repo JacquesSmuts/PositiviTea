@@ -1,5 +1,6 @@
 package com.jacquessmuts.positivitea.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -15,7 +16,7 @@ import com.jacquessmuts.positivitea.model.TeaBag.Companion.TEABAG_TABLE
 interface TeabagDao {
 
     @get:Query("SELECT * from $TEABAG_TABLE ORDER BY score DESC")
-    val allTeaBags: List<TeaBag>
+    val allTeaBags: LiveData<List<TeaBag>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(teaBag: TeaBag)

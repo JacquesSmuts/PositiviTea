@@ -14,7 +14,7 @@ import com.jacquessmuts.positivitea.model.TimeState
     exportSchema = false,
     version = 1)
 @TypeConverters(Converters::class)
-abstract class TeaDb : RoomDatabase() {
+abstract class TeaDatabase : RoomDatabase() {
 
     abstract fun teabagDao(): TeabagDao
 
@@ -24,14 +24,23 @@ abstract class TeaDb : RoomDatabase() {
 
     companion object {
 
+        var INSTANCE: TeaDatabase? = null
+
+        fun getDatabase(context: Context): TeaDatabase {
+            if (INSTANCE == null) {
+                synchronized(TeaDatabase::class) {
+                    INSTANCE = Room.databaseBuilder(
+                        context,
+                        TeaDatabase::class.java,
+                        DATABASE_NAME)
+                        .addCallback(TeaDatabaseCallback())
+                        .build()
+                }
+            }
+            return INSTANCE!!
+        }
+
         const val DATABASE_NAME = "tea_keeper.db"
 
-        fun initDb(context: Context): TeaDb {
-            return Room.databaseBuilder(
-                context,
-                TeaDb::class.java,
-                DATABASE_NAME)
-                .build()
-        }
     }
 }

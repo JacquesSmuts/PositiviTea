@@ -8,21 +8,20 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.LiveData
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.jacquessmuts.positivitea.MainActivity
 import com.jacquessmuts.positivitea.R
-import com.jacquessmuts.positivitea.database.TeaDb
+import com.jacquessmuts.positivitea.database.TeaDatabase
 import com.jacquessmuts.positivitea.model.TeaBag
 import com.jacquessmuts.positivitea.model.TeaPreferences
 import com.jacquessmuts.positivitea.model.TeaStrength
 import com.jacquessmuts.positivitea.model.getWaitTimeInSeconds
 import com.jacquessmuts.positivitea.util.ConversionUtils
 import com.jacquessmuts.positivitea.workmanager.NotificationWorker
-import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -37,8 +36,8 @@ import kotlin.random.Random
  */
 class NotificationService(
     private val context: Context,
-    private val teaDb: TeaDb,
-    private val teaService: TeaService
+    private val teaDb: TeaDatabase,
+    private val teaRepository: TeaRepository
 ) : CoroutineService {
 
     companion object {
@@ -50,23 +49,9 @@ class NotificationService(
 
     private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
 
-    var teaPreferences: TeaPreferences? = null
-        set(nuPreferences) {
-            field = nuPreferences
-            if (nuPreferences != null) {
-                teaPreferencesPublisher.onNext(nuPreferences)
-            }
-        }
-
-    private val teaPreferencesPublisher: PublishSubject<TeaPreferences> by lazy {
-        PublishSubject.create<TeaPreferences>()
-    }
-    val teaPreferencesObservable: Observable<TeaPreferences>
-        get() = teaPreferencesPublisher.hide()
+    var teaPreferences: LiveData<TeaPreferences> = teaDb.teaPreferencesDao().teaPreferences
 
     init {
-        loadPreferences()
-
         // TODO: do this slightly less often
         createNotificationChannel()
     }
@@ -88,29 +73,17 @@ class NotificationService(
         }
     }
 
-    fun loadPreferences() {
-        launch {
-            val loadedTeaPreferences: TeaPreferences? = teaDb.teaPreferencesDao().teaPreferences
-            if (loadedTeaPreferences == null) {
-                teaPreferences = TeaPreferences()
-            } else {
-                teaPreferences = loadedTeaPreferences
-            }
-        }
-    }
-
     fun updateTeaStrength(nuStrength: TeaStrength) {
 
-        val preferences = teaPreferences ?: TeaPreferences()
+        val oldPreferences = teaPreferences.value ?: TeaPreferences()
+        val nuPreferences = oldPreferences.copy(
+            teaStrength = nuStrength,
+            previousStrength = oldPreferences.teaStrength)
 
-        val oldStrength = preferences.teaStrength
-        teaPreferences = preferences.copy(teaStrength = nuStrength, previousStrength = oldStrength)
-        Timber.d("Saving teaPreferences as $teaPreferences")
+        Timber.d("Saving teaPreferences as $nuPreferences")
 
         launch {
-            teaPreferences?.let {
-                teaDb.teaPreferencesDao().insert(it)
-            }
+            teaDb.teaPreferencesDao().insert(nuPreferences)
         }
     }
 
@@ -118,14 +91,14 @@ class NotificationService(
 
         launch {
 
-            while (teaPreferences == null) {
+            while (teaPreferences.value == null) {
                 delay(10)
                 Timber.w("delaying notification service by 10ms because of a race condition")
             }
-            if (teaPreferences == null)
+            if (teaPreferences.value == null)
                 throw IllegalStateException("How did this even happen?")
 
-            val preferences = teaPreferences!!
+            val preferences: TeaPreferences = teaPreferences.value!!
 
             val oldTag = "$WORKER_TAG ${preferences.previousStrength.strength}"
             val tag = "$WORKER_TAG ${preferences.teaStrength.strength}"
@@ -157,17 +130,20 @@ class NotificationService(
 
         launch {
 
-            while (teaService.allTeaBags.isEmpty()) {
+            while (teaRepository.allTeaBags.value?.isEmpty() ?: false) {
                 Timber.w("Waiting for teabags to be loaded from server/db")
                 delay(100)
             }
 
-            val teabagNumber = teaService.allTeaBags.size
-            if (teabagNumber < 1)
-                this.coroutineContext.cancel()
+            teaRepository.allTeaBags.value?.let {
+                val teabagNumber = it.size
+                if (teabagNumber < 1)
+                    this.coroutineContext.cancel()
 
-            val selection = Random.nextInt(0, teabagNumber)
-            showNotification(teaService.allTeaBags[selection])
+                val selection = Random.nextInt(0, teabagNumber)
+                showNotification(it[selection])
+            }
+
         }
     }
 

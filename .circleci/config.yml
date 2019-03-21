@@ -8,6 +8,7 @@ jobs:
       JVM_OPTS: -Xmx4g
     steps:
       - checkout
+      - gradle wrapper
       - restore_cache:
           key: gradle-{{ checksum "build.gradle" }}
       - run:

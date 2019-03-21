@@ -3,7 +3,7 @@ package com.jacquessmuts.positivitea.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.jacquessmuts.positivitea.model.TimeState.Companion.TIMESTATE_TABLE
-import java.util.*
+import java.util.Date
 
 /**
  * Created by jacquessmuts on 2019-03-07

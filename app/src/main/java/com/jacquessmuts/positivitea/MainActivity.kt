@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.jacquessmuts.positivitea.model.TeaPreferences
 import com.jacquessmuts.positivitea.model.TeaStrength
 import com.jacquessmuts.positivitea.model.getDescription
 import com.jacquessmuts.positivitea.service.NotificationService
@@ -20,16 +19,13 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), KodeinAware {
 
-    protected val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
+    private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
 
     override val kodein by org.kodein.di.android.kodein()
 
     private lateinit var mainViewModel: MainViewModel
 
-    private val teaPreferences: TeaPreferences?
-        get() = mainViewModel.teaPreferences.value
-
-    val notificationService: NotificationService by instance()
+    private val notificationService: NotificationService by instance()
 
     // val seekbar = findViewById<SeekBar>(R.id.seekBar)
     // val textViewRegularity = findViewById<TextView>(R.id.textViewRegularity)
@@ -42,22 +38,20 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         linkViewModel()
     }
 
-    private fun linkViewModel(){
+    private fun linkViewModel() {
 
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
-        mainViewModel.allTeaBags.observe(this, Observer { teabags ->
+        mainViewModel.allTeaBags.observe(this, Observer {
             // Update the cached copy of the words in the adapter.
-            ///teabags.let { adapter.setWords(it) }
+            // /teabags.let { adapter.setWords(it) }
         })
 
         mainViewModel.teaPreferences.observe(this, Observer { preferences ->
 
             seekBar.setProgress(preferences.teaStrength.strength)
             textViewRegularity.setText(preferences.teaStrength.getDescription(baseContext))
-
         })
-
     }
 
     override fun onStart() {
@@ -68,7 +62,7 @@ class MainActivity : AppCompatActivity(), KodeinAware {
             .skip(2)
             .map { input ->
                 val nuStrength = TeaStrength(input)
-                textViewRegularity.setText(nuStrength.getDescription(baseContext))
+                textViewRegularity.text = nuStrength.getDescription(baseContext)
                 nuStrength
             }
             .throttleLast(2, TimeUnit.SECONDS)

@@ -14,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
  * Created by jacquessmuts on 2019-03-21
  * Base AndroidViewModel with Kodein and Coroutine context provided
  */
-abstract class BaseViewModel (application: Application) : AndroidViewModel(application),
+abstract class BaseViewModel(application: Application) : AndroidViewModel(application),
     CoroutineScope,
     KodeinAware {
 
@@ -31,5 +31,4 @@ abstract class BaseViewModel (application: Application) : AndroidViewModel(appli
         super.onCleared()
         coroutineContext.cancelChildren()
     }
-
 }

@@ -143,7 +143,6 @@ class NotificationService(
                 val selection = Random.nextInt(0, teabagNumber)
                 showNotification(it[selection])
             }
-
         }
     }
 

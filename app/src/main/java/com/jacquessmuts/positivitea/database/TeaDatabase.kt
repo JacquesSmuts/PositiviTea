@@ -41,6 +41,5 @@ abstract class TeaDatabase : RoomDatabase() {
         }
 
         const val DATABASE_NAME = "tea_keeper.db"
-
     }
 }

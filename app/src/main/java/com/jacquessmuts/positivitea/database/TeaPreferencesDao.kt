@@ -16,7 +16,10 @@ import com.jacquessmuts.positivitea.model.TeaPreferences.Companion.PREFERENCES_T
 interface TeaPreferencesDao {
 
     @get:Query("SELECT * from $PREFERENCES_TABLE WHERE ID = ${TeaPreferences.ID} LIMIT 1")
-    val teaPreferences: LiveData<TeaPreferences>
+    val liveTeaPreferences: LiveData<TeaPreferences>
+
+    @get:Query("SELECT * from $PREFERENCES_TABLE WHERE ID = ${TeaPreferences.ID} LIMIT 1")
+    val teaPreferences: TeaPreferences
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(teaPreferences: TeaPreferences)

@@ -15,7 +15,7 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
 
     private val teaRepository: TeaRepository by instance()
 
-    val allTeaBags: LiveData<List<TeaBag>> = teaRepository.allTeaBags
+    val allTeaBags: LiveData<List<TeaBag>> = teaRepository.liveTeaBags
 
-    val teaPreferences: LiveData<TeaPreferences> = teaRepository.teaPreferences
+    val teaPreferences: LiveData<TeaPreferences> = teaRepository.liveTeaPreferences
 }

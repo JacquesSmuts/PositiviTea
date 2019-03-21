@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.LiveData
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -21,7 +20,9 @@ import com.jacquessmuts.positivitea.model.TeaStrength
 import com.jacquessmuts.positivitea.model.getWaitTimeInSeconds
 import com.jacquessmuts.positivitea.util.ConversionUtils
 import com.jacquessmuts.positivitea.workmanager.NotificationWorker
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -49,9 +50,23 @@ class NotificationService(
 
     private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
 
-    var teaPreferences: LiveData<TeaPreferences> = teaDb.teaPreferencesDao().teaPreferences
+    private var teaPreferences: TeaPreferences? = null
+        set(nuPreferences) {
+            field = nuPreferences
+            if (nuPreferences != null) {
+                teaPreferencesPublisher.onNext(nuPreferences)
+            }
+        }
+
+    private val teaPreferencesPublisher: PublishSubject<TeaPreferences> by lazy {
+        PublishSubject.create<TeaPreferences>()
+    }
+    val teaPreferencesObservable: Observable<TeaPreferences>
+        get() = teaPreferencesPublisher.hide()
 
     init {
+        loadPreferences()
+
         // TODO: do this slightly less often
         createNotificationChannel()
     }
@@ -73,17 +88,29 @@ class NotificationService(
         }
     }
 
+    private fun loadPreferences() {
+        launch {
+            val loadedTeaPreferences: TeaPreferences? = teaDb.teaPreferencesDao().teaPreferences
+            teaPreferences = if (loadedTeaPreferences == null) {
+                TeaPreferences()
+            } else {
+                loadedTeaPreferences
+            }
+        }
+    }
+
     fun updateTeaStrength(nuStrength: TeaStrength) {
 
-        val oldPreferences = teaPreferences.value ?: TeaPreferences()
-        val nuPreferences = oldPreferences.copy(
-            teaStrength = nuStrength,
-            previousStrength = oldPreferences.teaStrength)
+        val preferences = teaPreferences ?: TeaPreferences()
 
-        Timber.d("Saving teaPreferences as $nuPreferences")
+        val oldStrength = preferences.teaStrength
+        teaPreferences = preferences.copy(teaStrength = nuStrength, previousStrength = oldStrength)
+        Timber.d("Saving teaPreferences as $teaPreferences")
 
         launch {
-            teaDb.teaPreferencesDao().insert(nuPreferences)
+            teaPreferences?.let {
+                teaDb.teaPreferencesDao().insert(it)
+            }
         }
     }
 
@@ -91,14 +118,14 @@ class NotificationService(
 
         launch {
 
-            while (teaPreferences.value == null) {
+            while (teaPreferences == null) {
                 delay(10)
                 Timber.w("delaying notification service by 10ms because of a race condition")
             }
-            if (teaPreferences.value == null)
+            if (teaPreferences == null)
                 throw IllegalStateException("How did this even happen?")
 
-            val preferences: TeaPreferences = teaPreferences.value!!
+            val preferences = teaPreferences!!
 
             val oldTag = "$WORKER_TAG ${preferences.previousStrength.strength}"
             val tag = "$WORKER_TAG ${preferences.teaStrength.strength}"
@@ -130,19 +157,17 @@ class NotificationService(
 
         launch {
 
-            while (teaRepository.allTeaBags.value?.isEmpty() ?: false) {
+            while (teaRepository.allTeaBags.isEmpty()) {
                 Timber.w("Waiting for teabags to be loaded from server/db")
                 delay(100)
             }
 
-            teaRepository.allTeaBags.value?.let {
-                val teabagNumber = it.size
-                if (teabagNumber < 1)
-                    this.coroutineContext.cancel()
+            val teabagNumber = teaRepository.allTeaBags.size
+            if (teabagNumber < 1)
+                this.coroutineContext.cancel()
 
-                val selection = Random.nextInt(0, teabagNumber)
-                showNotification(it[selection])
-            }
+            val selection = Random.nextInt(0, teabagNumber)
+            showNotification(teaRepository.allTeaBags[selection])
         }
     }
 

@@ -48,9 +48,8 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         })
 
         mainViewModel.teaPreferences.observe(this, Observer { preferences ->
-
-            seekBar.setProgress(preferences.teaStrength.strength)
-            textViewRegularity.setText(preferences.teaStrength.getDescription(baseContext))
+            seekBar.progress = preferences.teaStrength.strength
+            textViewRegularity.text = preferences.teaStrength.getDescription(baseContext)
         })
     }
 
@@ -65,7 +64,7 @@ class MainActivity : AppCompatActivity(), KodeinAware {
                 textViewRegularity.text = nuStrength.getDescription(baseContext)
                 nuStrength
             }
-            .throttleLast(2, TimeUnit.SECONDS)
+            .throttleLast(1, TimeUnit.SECONDS)
             .subscribeAndLogE { nuTeaStrength ->
                 Timber.d("user adjusted strength to $nuTeaStrength")
 

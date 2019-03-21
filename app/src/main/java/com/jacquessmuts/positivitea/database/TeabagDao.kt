@@ -16,7 +16,10 @@ import com.jacquessmuts.positivitea.model.TeaBag.Companion.TEABAG_TABLE
 interface TeabagDao {
 
     @get:Query("SELECT * from $TEABAG_TABLE ORDER BY score DESC")
-    val allTeaBags: LiveData<List<TeaBag>>
+    val allTeaBags: List<TeaBag>
+
+    @get:Query("SELECT * from $TEABAG_TABLE ORDER BY score DESC")
+    val liveAllTeaBags: LiveData<List<TeaBag>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(teaBag: TeaBag)

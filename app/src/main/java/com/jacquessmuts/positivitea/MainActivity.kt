@@ -27,24 +27,26 @@ class MainActivity : AppCompatActivity(), KodeinAware {
 
     private val notificationService: NotificationService by instance()
 
-    // val seekbar = findViewById<SeekBar>(R.id.seekBar)
-    // val textViewRegularity = findViewById<TextView>(R.id.textViewRegularity)
+    val adapter by lazy { TeaBagAdapter(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("OnCreate of MainActivity")
         setContentView(R.layout.activity_main)
 
+        recyclerView.adapter = adapter
+
         linkViewModel()
     }
+
 
     private fun linkViewModel() {
 
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
-        mainViewModel.allTeaBags.observe(this, Observer {
+        mainViewModel.allTeaBags.observe(this, Observer { teaBags ->
             // Update the cached copy of the words in the adapter.
-            // /teabags.let { adapter.setWords(it) }
+            teaBags.let { adapter.teaBags = it }
         })
 
         mainViewModel.teaPreferences.observe(this, Observer { preferences ->

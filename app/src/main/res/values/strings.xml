@@ -19,4 +19,11 @@
         <item>±1 time per week</item>
     </string-array>
 
+    <string name="title_activity_add">AddActivity</string>
+    <string name="title">Title</string>
+    <string name="message">Message</string>
+    <string name="save">SAVE!</string>
+    <string name="add_success">Successfully saved. Your message might be approved later, but it\'s on your device right now.</string>
+    <string name="add_failure">Failed to add. Try again later.</string>
+
 </resources>

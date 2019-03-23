@@ -1,27 +1,23 @@
-package com.jacquessmuts.positivitea
+package com.jacquessmuts.positivitea.activity
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.jacquessmuts.positivitea.R
+import com.jacquessmuts.positivitea.adapter.TeaBagAdapter
 import com.jacquessmuts.positivitea.model.TeaStrength
 import com.jacquessmuts.positivitea.model.getDescription
 import com.jacquessmuts.positivitea.service.NotificationService
 import com.jacquessmuts.positivitea.util.subscribeAndLogE
 import com.jacquessmuts.positivitea.viewmodel.MainViewModel
 import com.jakewharton.rxbinding2.widget.RxSeekBar
-import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
-import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
-class MainActivity : AppCompatActivity(), KodeinAware {
-
-    private val rxSubs: CompositeDisposable by lazy { CompositeDisposable() }
-
-    override val kodein by org.kodein.di.android.kodein()
+class MainActivity : BaseActivity() {
 
     private lateinit var mainViewModel: MainViewModel
 
@@ -74,11 +70,12 @@ class MainActivity : AppCompatActivity(), KodeinAware {
                 notificationService.scheduleNextNotification()
         })
 
+        fab.setOnClickListener {
+            val intent = Intent(this, AddActivity::class.java)
+            startActivity(intent)
+        }
+
         notificationService.scheduleNextNotification()
     }
 
-    override fun onPause() {
-        rxSubs.clear()
-        super.onPause()
-    }
 }

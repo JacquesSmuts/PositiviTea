@@ -1,6 +1,7 @@
 package com.jacquessmuts.positivitea.service
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.jacquessmuts.positivitea.database.TeaDatabase
 import com.jacquessmuts.positivitea.database.TeabagDbObserver
 import com.jacquessmuts.positivitea.database.TimeStateDbObserver
@@ -14,6 +15,7 @@ import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -185,5 +187,35 @@ class TeaRepository(private val teaDb: TeaDatabase) : CoroutineService {
                     }
                 }
         }
+    }
+
+    fun saveTeabagToServer(title: String, message: String, finished: (success: Boolean) -> Unit) {
+        require(title.isNotBlank())
+        require(message.isNotBlank())
+
+        val nuTeabag = TeaBag(id = UUID.randomUUID().toString(),
+            title = title,
+            message = message,
+            score = 0L)
+
+        val docData = HashMap<String, Any?>()
+        docData["id"] = nuTeabag.id
+        docData["title"] = nuTeabag.title
+        docData["message"] = nuTeabag.message
+        docData["score"] = nuTeabag.score
+
+        FirebaseFirestore.getInstance()
+            .collection(FirestoreConstants.COLLECTION_TEABAGS)
+            .document(nuTeabag.id)
+            .set(docData, SetOptions.merge())
+            .addOnCompleteListener { result ->
+                if (result.isSuccessful) {
+                    launch {
+                        teaDb.teabagDao().insert(nuTeabag)
+                    }
+                }
+                finished(result.isSuccessful)
+            }
+
     }
 }

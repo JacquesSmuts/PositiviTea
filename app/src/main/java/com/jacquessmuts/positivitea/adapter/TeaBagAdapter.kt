@@ -1,10 +1,11 @@
-package com.jacquessmuts.positivitea
+package com.jacquessmuts.positivitea.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.model.TeaBag
 import kotlinx.android.synthetic.main.item_teabag.view.*
 

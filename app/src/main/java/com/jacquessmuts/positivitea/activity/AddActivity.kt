@@ -1,6 +1,7 @@
 package com.jacquessmuts.positivitea.activity
 
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import com.jacquessmuts.positivitea.R
@@ -9,8 +10,6 @@ import com.jacquessmuts.positivitea.util.subscribeAndLogE
 import com.jakewharton.rxbinding2.view.RxView
 import kotlinx.android.synthetic.main.activity_add.*
 import kotlinx.android.synthetic.main.content_add.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.kodein.di.generic.instance
 import java.util.concurrent.TimeUnit
 
@@ -45,11 +44,10 @@ class AddActivity : BaseActivity() {
                     val toast = Toast.makeText(this, message, Toast.LENGTH_LONG)
                     toast.show()
 
-                    launch {
-                        while (toast.view != null && toast.view.visibility == View.VISIBLE) {
-                            delay(100)
-                        }
-                        this@AddActivity.onBackPressed()
+                    if (success) {
+                        Handler().postDelayed({
+                            onBackPressed()
+                        }, 3000)
                     }
                 }
             })

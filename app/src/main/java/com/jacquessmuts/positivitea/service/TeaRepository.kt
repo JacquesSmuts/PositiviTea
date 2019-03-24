@@ -199,13 +199,14 @@ class TeaRepository(private val teaDb: TeaDatabase) : CoroutineService {
             score = 0L)
 
         val docData = HashMap<String, Any?>()
-        docData["id"] = nuTeabag.id
         docData["title"] = nuTeabag.title
         docData["message"] = nuTeabag.message
         docData["score"] = nuTeabag.score
 
+        Timber.i("Saving teabag to server. Teabag = $nuTeabag")
+
         FirebaseFirestore.getInstance()
-            .collection(FirestoreConstants.COLLECTION_TEABAGS)
+            .collection(FirestoreConstants.COLLECTION_UNAPPROVED_TEABAGS)
             .document(nuTeabag.id)
             .set(docData, SetOptions.merge())
             .addOnCompleteListener { result ->
@@ -215,6 +216,8 @@ class TeaRepository(private val teaDb: TeaDatabase) : CoroutineService {
                     }
                 }
                 finished(result.isSuccessful)
+
+                Timber.d("Saved teabag. Success = ${result.isSuccessful}")
             }
 
     }

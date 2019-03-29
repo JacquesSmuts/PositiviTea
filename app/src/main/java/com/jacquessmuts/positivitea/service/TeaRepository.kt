@@ -8,6 +8,7 @@ import com.jacquessmuts.positivitea.database.TimeStateDbObserver
 import com.jacquessmuts.positivitea.firestore.FirestoreConstants
 import com.jacquessmuts.positivitea.model.TeaBag
 import com.jacquessmuts.positivitea.model.TimeState
+import com.jacquessmuts.positivitea.util.AppUtils
 import com.jacquessmuts.positivitea.util.subscribeAndLogE
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -160,10 +161,16 @@ class TeaRepository(private val teaDb: TeaDatabase) : CoroutineService {
 
         Timber.d("Getting teabags from server")
 
+        val collection = if (AppUtils.isModerator()) {
+            FirestoreConstants.COLLECTION_UNAPPROVED_TEABAGS
+        } else {
+            FirestoreConstants.COLLECTION_TEABAGS
+        }
+
         val firestore = FirebaseFirestore.getInstance()
 
         suspendCoroutine<Boolean> { continuation ->
-            firestore.collection(FirestoreConstants.COLLECTION_TEABAGS)
+            firestore.collection(collection)
                 .get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful && task.result != null) {
@@ -189,7 +196,51 @@ class TeaRepository(private val teaDb: TeaDatabase) : CoroutineService {
         }
     }
 
-    fun saveTeabagToServer(title: String, message: String, finished: (success: Boolean) -> Unit) {
+    fun approveTeabag(approvedTeabag: TeaBag, finished: (success: Boolean) -> Unit) {
+
+        val docData = HashMap<String, Any?>()
+        docData["title"] = approvedTeabag.title
+        docData["message"] = approvedTeabag.message
+        docData["score"] = approvedTeabag.score
+
+        Timber.i("Saving teabag to server. Teabag = $approvedTeabag")
+
+        FirebaseFirestore.getInstance()
+            .collection(FirestoreConstants.COLLECTION_TEABAGS)
+            .document(approvedTeabag.id)
+            .set(docData, SetOptions.merge())
+            .addOnCompleteListener { result ->
+                if (result.isSuccessful) {
+                    deleteUnapprovedTeabag(approvedTeabag.id, true) { success ->
+                        finished(result.isSuccessful && success)
+                    }
+                }
+
+                Timber.d("Approved teabag. Success = ${result.isSuccessful}")
+            }
+
+    }
+
+    fun deleteUnapprovedTeabag(id: String, deleteFromLocalDb: Boolean = true, finished: (success: Boolean) -> Unit) {
+
+        FirebaseFirestore.getInstance()
+            .collection(FirestoreConstants.COLLECTION_UNAPPROVED_TEABAGS)
+            .document(id)
+            .delete()
+            .addOnCompleteListener { result ->
+                if (result.isSuccessful && deleteFromLocalDb) {
+                    launch {
+                        teaDb.teabagDao().delete(id)
+                    }
+                }
+                finished(result.isSuccessful)
+
+                Timber.d("Saved teabag. Success = ${result.isSuccessful}")
+            }
+
+    }
+
+    fun saveUnapprovedTeaBagToServer(title: String, message: String, finished: (success: Boolean) -> Unit) {
         require(title.isNotBlank())
         require(message.isNotBlank())
 

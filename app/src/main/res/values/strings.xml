@@ -25,5 +25,7 @@
     <string name="save">SAVE!</string>
     <string name="add_success">Successfully saved. Your message might be approved later, but it\'s on your device right now.</string>
     <string name="add_failure">Failed to add. Try again later.</string>
+    <string name="approved">Approved</string>
+    <string name="deleted">Deleted.</string>
 
 </resources>

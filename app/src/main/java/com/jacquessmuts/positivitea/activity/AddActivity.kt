@@ -32,7 +32,7 @@ class AddActivity : BaseActivity() {
             .filter { validateInputs() }
             .subscribeAndLogE {
                 progress.visibility = View.VISIBLE
-                teaRepository.saveTeabagToServer(editTitle.text.toString(),
+                teaRepository.saveUnapprovedTeaBagToServer(editTitle.text.toString(),
                     editMessage.text.toString()) { success ->
                     progress.visibility = View.GONE
 
@@ -54,7 +54,7 @@ class AddActivity : BaseActivity() {
 
     }
 
-    fun validateInputs(): Boolean {
+    private fun validateInputs(): Boolean {
         val valid = editTitle.text.toString().isNotBlank() && editMessage.text.toString().isNotBlank()
 
         if (!valid) {

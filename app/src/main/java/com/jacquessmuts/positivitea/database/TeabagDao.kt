@@ -24,6 +24,9 @@ interface TeabagDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(teaBag: TeaBag)
 
+    @Query("DELETE FROM $TEABAG_TABLE WHERE ID = :id")
+    fun delete(id: String)
+
     @Query("DELETE FROM $TEABAG_TABLE")
     fun deleteAll()
 }

@@ -10,7 +10,7 @@ jobs:
       - checkout
       # Decode the google-services.json file from the environment variables and save in environment
       - run:
-          name: Run ktlint
+          name: Decode google-services.json from env-vars
           command: echo $ENCODED_GOOGLE_SERVICE_JSON | base64 --decode > app/google-services.json
       - restore_cache:
           key: gradle-{{ checksum "build.gradle" }}
@@ -24,15 +24,18 @@ jobs:
       - run:
           name: Run ktlint
           command: ./gradlew ktlint
-      - store_artifacts:
-          path: app/build/reports
-          destination: reports
       - run:
-          name: Run lint
-          command: ./gradlew lintDebug
+          name: Run user lint
+          command: ./gradlew lintUserDebug
       - run:
-          name: Run unit tests
-          command: ./gradlew testDebugUnitTest
+          name: Run moderator lint
+          command: ./gradlew lintModeratorDebug
+      - run:
+          name: Run user unit tests
+          command: ./gradlew testUserDebugUnitTest
+      - run:
+          name: Run moderator unit tests
+          command: ./gradlew testModeratorDebugUnitTest
       - store_artifacts:
           path: app/build/reports
           destination: reports

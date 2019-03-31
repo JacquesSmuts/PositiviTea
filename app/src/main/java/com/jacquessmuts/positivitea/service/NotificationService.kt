@@ -11,7 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.jacquessmuts.positivitea.MainActivity
+import com.jacquessmuts.positivitea.activity.MainActivity
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.database.TeaDatabase
 import com.jacquessmuts.positivitea.model.TeaBag

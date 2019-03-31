@@ -3,6 +3,7 @@
     <string name="notification_channel_name">Teabag Stream</string>
     <string name="notification_channel_description">This is the channel where all notifications are delivered</string>
     <string name="how_often_message">How often do you want positive messages?</string>
+    <string name="potential_message">Potential Messages:</string>
 
     <string-array name="regularity">
         <item>NON. STOP. MADNESS</item>
@@ -17,5 +18,14 @@
         <item>±3 times a week</item>
         <item>±1 time per week</item>
     </string-array>
+
+    <string name="title_activity_add">AddActivity</string>
+    <string name="title">Title</string>
+    <string name="message">Message</string>
+    <string name="save">SAVE!</string>
+    <string name="add_success">Successfully saved. Your message might be approved later, but it\'s on your device right now.</string>
+    <string name="add_failure">Failed to add. Try again later.</string>
+    <string name="approved">Approved</string>
+    <string name="deleted">Deleted.</string>
 
 </resources>

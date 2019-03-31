@@ -28,11 +28,17 @@ jobs:
           path: app/build/reports
           destination: reports
       - run:
-          name: Run lint
-          command: ./gradlew lintDebug
+          name: Run user lint
+          command: ./gradlew lintUserDebug
+       - run:
+          name: Run moderator lint
+          command: ./gradlew lintModeratorDebug
       - run:
-          name: Run unit tests
-          command: ./gradlew testDebugUnitTest
+          name: Run user unit tests
+          command: ./gradlew testUserDebugUnitTest
+       - run:
+          name: Run moderator unit tests
+          command: ./gradlew testModeratorDebugUnitTest
       - store_artifacts:
           path: app/build/reports
           destination: reports

@@ -47,7 +47,6 @@ class MainActivity : BaseActivity() {
         linkViewModel()
     }
 
-
     private fun linkViewModel() {
 
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)

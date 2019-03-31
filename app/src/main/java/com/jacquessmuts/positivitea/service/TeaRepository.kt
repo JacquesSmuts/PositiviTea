@@ -16,7 +16,7 @@ import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -218,7 +218,6 @@ class TeaRepository(private val teaDb: TeaDatabase) : CoroutineService {
 
                 Timber.d("Approved teabag. Success = ${result.isSuccessful}")
             }
-
     }
 
     fun deleteUnapprovedTeabag(id: String, deleteFromLocalDb: Boolean = true, finished: (success: Boolean) -> Unit) {
@@ -237,7 +236,6 @@ class TeaRepository(private val teaDb: TeaDatabase) : CoroutineService {
 
                 Timber.d("Saved teabag. Success = ${result.isSuccessful}")
             }
-
     }
 
     fun saveUnapprovedTeaBagToServer(title: String, message: String, finished: (success: Boolean) -> Unit) {
@@ -270,6 +268,5 @@ class TeaRepository(private val teaDb: TeaDatabase) : CoroutineService {
 
                 Timber.d("Saved teabag. Success = ${result.isSuccessful}")
             }
-
     }
 }

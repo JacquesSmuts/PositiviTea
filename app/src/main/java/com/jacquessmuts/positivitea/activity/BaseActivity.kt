@@ -13,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
  * Created by jacquessmuts on 2019-03-23
  * Base for other activites, mostly to provide kodein and coroutine functionality
  */
-abstract class BaseActivity: AppCompatActivity(), KodeinAware, CoroutineScope {
+abstract class BaseActivity : AppCompatActivity(), KodeinAware, CoroutineScope {
 
     private val job = SupervisorJob()
 
@@ -33,5 +33,4 @@ abstract class BaseActivity: AppCompatActivity(), KodeinAware, CoroutineScope {
         super.onDestroy()
         coroutineContext.cancelChildren()
     }
-
 }

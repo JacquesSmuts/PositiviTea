@@ -12,8 +12,8 @@ import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.item_teabag.view.*
 
 class TeaBagAdapter internal constructor(
-        context: Context,
-        val teabagVotePublisher: PublishSubject<TeaBagVote>
+    context: Context,
+    val teabagVotePublisher: PublishSubject<TeaBagVote>
 ) : RecyclerView.Adapter<TeaBagAdapter.TeaBagHolder>() {
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -54,9 +54,7 @@ class TeaBagAdapter internal constructor(
                 itemView.imageDownvote.setOnClickListener {
                     teabagVotePublisher.onNext(TeaBagVote(teaBag, false))
                 }
-
             }
-
         }
     }
 }

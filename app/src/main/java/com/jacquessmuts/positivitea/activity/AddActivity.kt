@@ -51,7 +51,6 @@ class AddActivity : BaseActivity() {
                     }
                 }
             })
-
     }
 
     private fun validateInputs(): Boolean {

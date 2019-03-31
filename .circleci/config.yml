@@ -36,7 +36,7 @@ jobs:
       - run:
           name: Run user unit tests
           command: ./gradlew testUserDebugUnitTest
-       - run:
+      - run:
           name: Run moderator unit tests
           command: ./gradlew testModeratorDebugUnitTest
       - store_artifacts:

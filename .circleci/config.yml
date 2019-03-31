@@ -30,7 +30,7 @@ jobs:
       - run:
           name: Run user lint
           command: ./gradlew lintUserDebug
-       - run:
+      - run:
           name: Run moderator lint
           command: ./gradlew lintModeratorDebug
       - run:

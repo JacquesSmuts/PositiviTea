@@ -11,8 +11,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.jacquessmuts.positivitea.activity.MainActivity
 import com.jacquessmuts.positivitea.R
+import com.jacquessmuts.positivitea.activity.MainActivity
 import com.jacquessmuts.positivitea.database.TeaDatabase
 import com.jacquessmuts.positivitea.model.TeaBag
 import com.jacquessmuts.positivitea.model.TeaPreferences
@@ -181,7 +181,7 @@ class NotificationService(
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_stat_name)
+            .setSmallIcon(R.drawable.ic_notification_icon)
             .setContentTitle(teaBag.title)
             .setContentText(teaBag.message)
             .setStyle(NotificationCompat.BigTextStyle()

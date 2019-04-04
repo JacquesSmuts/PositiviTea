@@ -1,7 +1,10 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlin-kapt'
+    id 'com.github.triplet.play' version '2.1.0'
+}
 
 android {
     compileSdkVersion versions.compileSdk
@@ -14,10 +17,20 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE") ?: "keystore.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEYSTORE_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
@@ -39,6 +52,14 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+}
+
+// Configuration for com.github.triplet.play deployment
+play {
+    track = 'internal' // or alpha or beta...
+    serviceAccountCredentials = file(System.getenv("PRIVATE_KEY") ?: "private_key.json")
+    defaultToAppBundles = true // Use App Bundle instead of APK
+    resolutionStrategy = "ignore" //If the deployment fails due to an API error, don't fail the CI Build
 }
 
 dependencies {

@@ -23,3 +23,4 @@
 .idea/vcs.xml
 app/libs/
 app/user/release/
+/keystore.jks

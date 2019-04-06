@@ -1,7 +1,10 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlin-kapt'
+    id 'com.github.triplet.play' version '2.1.0'
+}
 
 android {
     compileSdkVersion versions.compileSdk
@@ -9,15 +12,26 @@ android {
         applicationId "com.jacquessmuts.positivitea"
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode 2
         versionName "0.1.0"
+        versionCode getBuildVersion() as int
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        archivesBaseName = "positivitea-$versionName-$versionCode"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE") ?: "keystore.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEYSTORE_ALIAS")
+            keyPassword System.getenv("KEYSTORE_PASSWORD")
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
@@ -39,6 +53,24 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+}
+
+// Don't name this getVersionCode() or things will break
+def getBuildVersion() {
+    def version = 1
+    def buildNumber = System.getenv("CIRCLE_BUILD_NUM")
+    if (buildNumber != null) {
+        version += buildNumber
+    }
+    println("VersionCode: " + version)
+    return version
+}
+
+// Configuration for com.github.triplet.play deployment
+play {
+    track = 'internal'
+    serviceAccountCredentials = file(System.getenv("PRIVATE_KEY") ?: "private_key.json")
+    resolutionStrategy = "ignore" //If the deployment fails due to an API error, don't fail the CI Build
 }
 
 dependencies {

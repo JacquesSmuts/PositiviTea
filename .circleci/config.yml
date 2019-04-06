@@ -46,8 +46,8 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
-        name: Decode google-services.json from env-vars
-        command: echo $ENCODED_GOOGLE_SERVICE_JSON | base64 --decode > app/google-services.json
+          name: Decode google-services.json from env-vars
+          command: echo $ENCODED_GOOGLE_SERVICE_JSON | base64 --decode > app/google-services.json
       - run:
           name: Run User Tests
           command: ./gradlew testUserDebugUnitTest -x lint

@@ -130,23 +130,22 @@ workflows:
   build-and-deploy:
     jobs:
       - prepare
-#      - ktlint:
-#          requires:
-#            - prepare
-#      - unit_tests:
-#          requires:
-#            - prepare
-#      - hold:
-#          type: approval
-#          requires:
-#            - ktlint
-#            - unit_tests
-#          filters:
-#            branches:
-#              only:
-#              - master
-#              - /release\/.*/ # all branches starting with release/
-#              - automatic_deployment
+      - ktlint:
+          requires:
+            - prepare
+      - unit_tests:
+          requires:
+            - prepare
+      - hold:
+          type: approval
+          requires:
+            - ktlint
+            - unit_tests
+          filters:
+            branches:
+              only:
+              - master
+              - /release\/.*/ # all branches starting with release/
       - deploy:
           requires:
             - prepare
@@ -154,5 +153,4 @@ workflows:
             branches:
               only:
               - master
-              - /release\/.*/ # all branches starting with release
-              - automatic_deployment
+              - /release\/.*/ # all branches starting with release/

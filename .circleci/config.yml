@@ -46,8 +46,8 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
-          name: Run Tests
-          command: ./gradlew testDebugUnitTest -x lint
+          name: Run User Tests
+          command: ./gradlew testUserDebugUnitTest -x lint
       - store_artifacts:
           path: app/build/reports
           destination: reports

@@ -4,6 +4,6 @@
 *Features*
  - More regular updates! I added remoteConfig to control the update regularity. This way if I get more users I can control the slider myself to prevent hitting the server too hard.
 
-I spent most of the time on this release on the automatic deployment. It should hopefully save my hours in the future, so I hope it's worth it.
+I spent most of the time on this release on the automatic deployment. It should hopefully save my hours in the future.
 
 Also, these release notes were written in a text file, not on Google Play. Let's see if it works.

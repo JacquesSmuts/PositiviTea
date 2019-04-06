@@ -109,12 +109,8 @@ jobs:
             echo $ENCODED_KEYSTORE | base64 --decode >> ${HOME}/keystore
             echo 'export KEYSTORE=${HOME}/keystore' >> $BASH_ENV
       - run:
-          name: Build apk
-          command: ./gradlew :app:assembleUserRelease
-      - run:
-          name: Find APK and set path
-          command: |
-            echo 'export APK_PATH=`find . -path "*.apk" ! -path "*unaligned.apk" ! -path "*Test*.apk" -print -quit`' >> $BASH_ENV
+          name: Build bundle
+          command: ./gradlew :app:bundleUserRelease
       - run:
           name: Decode and store Private Key
           command: |

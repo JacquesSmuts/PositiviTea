@@ -111,7 +111,7 @@ jobs:
       - run:
           name: Build bundle
           command: ./gradlew :app:bundleUser
-       - run:
+      - run:
           name: Find APK and set path
           command: |
             echo 'export APK_PATH=`find . -path "*.aab" ! -path "*unaligned.aab" ! -path "*Test*.aab" -print -quit`' >> $BASH_ENV

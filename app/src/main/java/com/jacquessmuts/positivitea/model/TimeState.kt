@@ -18,7 +18,7 @@ data class TimeState(
     companion object {
         const val ID = 451
         const val TIMESTATE_TABLE = "timestate_table"
-        const val ONE_HOUR =  60 * 60 * 1000 // 1 hour
+        const val ONE_HOUR = 60 * 60 * 1000 // 1 hour
     }
 
     val canMakeNewApiCall: Boolean

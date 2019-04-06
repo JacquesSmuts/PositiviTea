@@ -35,7 +35,6 @@ class PositiviTeaApp : Application(), KodeinAware {
         Timber.plant(Timber.DebugTree())
 
         setRemoteConfigDefaults()
-
     }
 
     private fun setRemoteConfigDefaults() {

@@ -148,7 +148,7 @@ workflows:
               - /release\/.*/ # all branches starting with release/
       - deploy:
           requires:
-            - prepare
+            - hold
           filters:
             branches:
               only:

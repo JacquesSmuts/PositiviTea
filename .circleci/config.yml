@@ -110,7 +110,7 @@ jobs:
             echo 'export KEYSTORE=${HOME}/keystore' >> $BASH_ENV
       - run:
           name: Build bundle
-          command: ./gradlew :app:bundleUserRelease
+          command: ./gradlew :app:bundleUser
       - run:
           name: Decode and store Private Key
           command: |

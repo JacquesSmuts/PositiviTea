@@ -111,11 +111,15 @@ jobs:
       - run:
           name: Build bundle
           command: ./gradlew :app:bundleUser
+       - run:
+          name: Find APK and set path
+          command: |
+            echo 'export APK_PATH=`find . -path "*.aab" ! -path "*unaligned.aab" ! -path "*Test*.aab" -print -quit`' >> $BASH_ENV
       - run:
           name: Decode and store Private Key
           command: |
             echo $DEPLOYMENT_PRIVATE_KEY | base64 --decode >> ${HOME}/rxstarter_pk.json
-            echo 'export PRIVATE_KEY=${HOME}/rxstarter_pk.json' >> $BASH_ENV
+            echo 'export PRIVATE_KEY=${HOME}/positivitea_pk.json' >> $BASH_ENV
       - run:
           name: Upload to Google Play
           command: ./gradlew publishUserRelease
@@ -125,26 +129,26 @@ workflows:
   build-and-deploy:
     jobs:
       - prepare
-      - ktlint:
-          requires:
-            - prepare
-      - unit_tests:
-          requires:
-            - prepare
-      - hold:
-          type: approval
-          requires:
-            - ktlint
-            - unit_tests
-          filters:
-            branches:
-              only:
-              - master
-              - /release\/.*/ # all branches starting with release/
-              - automatic_deployment
+#      - ktlint:
+#          requires:
+#            - prepare
+#      - unit_tests:
+#          requires:
+#            - prepare
+#      - hold:
+#          type: approval
+#          requires:
+#            - ktlint
+#            - unit_tests
+#          filters:
+#            branches:
+#              only:
+#              - master
+#              - /release\/.*/ # all branches starting with release/
+#              - automatic_deployment
       - deploy:
           requires:
-            - hold
+            - prepare
           filters:
             branches:
               only:

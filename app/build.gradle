@@ -104,6 +104,7 @@ dependencies {
     implementation "com.google.firebase:firebase-core:$versions.firebase.core"
     implementation "com.google.firebase:firebase-firestore:$versions.firebase.firestore"
     implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
+    implementation "com.google.firebase:firebase-config:$versions.firebase.remote_config"
 
     // RxJava
     implementation "io.reactivex.rxjava2:rxandroid:$versions.rx.android"

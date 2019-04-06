@@ -2,6 +2,7 @@ package com.jacquessmuts.positivitea.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.jacquessmuts.positivitea.model.TimeState.Companion.TIMESTATE_TABLE
 import java.util.Date
 
@@ -17,12 +18,13 @@ data class TimeState(
     companion object {
         const val ID = 451
         const val TIMESTATE_TABLE = "timestate_table"
-        const val MINIMUM_TIME_SINCE_TEA_UPDATE = 178 * 60 * 60 * 1000 // 1 week
+        const val ONE_HOUR =  60 * 60 * 1000 // 1 hour
     }
 
     val canMakeNewApiCall: Boolean
         get() {
-            return (System.currentTimeMillis() - timeTeabagsUpdated) > MINIMUM_TIME_SINCE_TEA_UPDATE
+            val hoursBetweenUpdate = FirebaseRemoteConfig.getInstance().getLong("hours_between_updates")
+            return (System.currentTimeMillis() - timeTeabagsUpdated) > (hoursBetweenUpdate * ONE_HOUR)
         }
 }
 

@@ -31,7 +31,8 @@ buildscript {
             ],
             firebase: [
                     core: '16.0.8',
-                    firestore: '18.1.0'
+                    firestore: '18.1.0',
+                    remote_config: '16.4.1'
             ]
     ]
 

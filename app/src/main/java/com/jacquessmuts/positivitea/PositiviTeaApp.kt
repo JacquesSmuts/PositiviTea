@@ -2,6 +2,8 @@ package com.jacquessmuts.positivitea
 
 import android.app.Application
 import android.content.Context
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.jacquessmuts.positivitea.database.TeaDatabase
 import com.jacquessmuts.positivitea.service.NotificationService
 import com.jacquessmuts.positivitea.service.TeaRepository
@@ -31,5 +33,23 @@ class PositiviTeaApp : Application(), KodeinAware {
         super.onCreate()
 
         Timber.plant(Timber.DebugTree())
+
+        setRemoteConfigDefaults()
+
+    }
+
+    private fun setRemoteConfigDefaults() {
+
+        val remoteConfig = FirebaseRemoteConfig.getInstance()
+
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setDeveloperModeEnabled(BuildConfig.DEBUG)
+            .build()
+        remoteConfig.setConfigSettings(configSettings)
+
+        remoteConfig.setDefaults(R.xml.remote_config_defaults)
+        remoteConfig.fetch().addOnCompleteListener { task ->
+            remoteConfig.activateFetched()
+        }
     }
 }

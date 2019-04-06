@@ -12,9 +12,10 @@ android {
         applicationId "com.jacquessmuts.positivitea"
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode 2
         versionName "0.1.0"
+        versionCode getBuildVersion() as int
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        archivesBaseName = "positivitea-$versionName-$versionCode"
     }
 
     signingConfigs {
@@ -52,6 +53,17 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+}
+
+// Don't name this getVersionCode() or things will break
+def getBuildVersion() {
+    def version = 1
+    def buildNumber = System.getenv("CIRCLE_BUILD_NUM")
+    if (buildNumber != null) {
+        version += buildNumber
+    }
+    println("VersionCode: " + version)
+    return version
 }
 
 // Configuration for com.github.triplet.play deployment

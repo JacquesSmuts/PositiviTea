@@ -112,10 +112,6 @@ jobs:
           name: Build bundle
           command: ./gradlew :app:bundleUser
       - run:
-          name: Find APK and set path
-          command: |
-            echo 'export APK_PATH=`find . -path "*.aab" ! -path "*unaligned.aab" ! -path "*Test*.aab" -print -quit`' >> $BASH_ENV
-      - run:
           name: Decode and store Private Key
           command: |
             echo $DEPLOYMENT_PRIVATE_KEY | base64 --decode >> ${HOME}/rxstarter_pk.json

@@ -12,7 +12,7 @@ android {
         applicationId "com.jacquessmuts.positivitea"
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionName "0.1.0"
+        versionName "0.1.1"
         versionCode getBuildVersion() as int
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         archivesBaseName = "positivitea-$versionName-$versionCode"
@@ -68,7 +68,7 @@ def getBuildVersion() {
 
 // Configuration for com.github.triplet.play deployment
 play {
-    track = 'internal'
+    track = 'alpha'
     serviceAccountCredentials = file(System.getenv("PRIVATE_KEY") ?: "private_key.json")
     resolutionStrategy = "ignore" //If the deployment fails due to an API error, don't fail the CI Build
 }

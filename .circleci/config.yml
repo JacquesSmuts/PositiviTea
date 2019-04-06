@@ -104,17 +104,17 @@ jobs:
           name: Decode google-services.json from env-vars
           command: echo $ENCODED_GOOGLE_SERVICE_JSON | base64 --decode > app/google-services.json
       - run:
+          name: Decode and store Keystore
+          command: |
+            echo $ENCODED_KEYSTORE | base64 --decode >> ${HOME}/keystore
+            echo 'export KEYSTORE=${HOME}/keystore' >> $BASH_ENV
+      - run:
           name: Build apk
           command: ./gradlew :app:assembleUserRelease
       - run:
           name: Find APK and set path
           command: |
             echo 'export APK_PATH=`find . -path "*.apk" ! -path "*unaligned.apk" ! -path "*Test*.apk" -print -quit`' >> $BASH_ENV
-      - run:
-          name: Decode and store Keystore
-          command: |
-            echo $ENCODED_KEYSTORE | base64 --decode >> ${HOME}/keystore
-            echo 'export KEYSTORE=${HOME}/keystore' >> $BASH_ENV
       - run:
           name: Decode and store Private Key
           command: |

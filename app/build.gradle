@@ -56,7 +56,7 @@ android {
 
 // Configuration for com.github.triplet.play deployment
 play {
-    track = 'internal' // or alpha or beta...
+    track = 'internal'
     serviceAccountCredentials = file(System.getenv("PRIVATE_KEY") ?: "private_key.json")
     defaultToAppBundles = true // Use App Bundle instead of APK
     resolutionStrategy = "ignore" //If the deployment fails due to an API error, don't fail the CI Build

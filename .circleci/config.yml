@@ -109,12 +109,17 @@ jobs:
             echo $ENCODED_KEYSTORE | base64 --decode >> ${HOME}/keystore
             echo 'export KEYSTORE=${HOME}/keystore' >> $BASH_ENV
       - run:
-          name: Build bundle
-          command: ./gradlew :app:bundleUser
+          name: Build apk
+          command: ./gradlew :app:assembleUser
+      - run:
+          name: Find APK and set path
+          command: |
+            echo 'export APK_PATH=`find . -path "*.apk" ! -path "*unaligned.apk" ! -path "*Test*.apk" -print -quit`' >> $BASH_ENV
+
       - run:
           name: Decode and store Private Key
           command: |
-            echo $DEPLOYMENT_PRIVATE_KEY | base64 --decode >> ${HOME}/rxstarter_pk.json
+            echo $DEPLOYMENT_PRIVATE_KEY | base64 --decode >> ${HOME}/positivitea_pk.json
             echo 'export PRIVATE_KEY=${HOME}/positivitea_pk.json' >> $BASH_ENV
       - run:
           name: Upload to Google Play

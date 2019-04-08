@@ -75,9 +75,12 @@ play {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(path: ':api')
+
     // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin.core"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.kotlin.coroutines"
 
     // Official Android
     implementation 'androidx.core:core:1.0.1'
@@ -100,12 +103,6 @@ dependencies {
     implementation "org.kodein.di:kodein-di-generic-jvm:$versions.kodein"
     implementation "org.kodein.di:kodein-di-framework-android-x:$versions.kodein"
 
-    // Firebase (for backend, not database)
-    implementation "com.google.firebase:firebase-core:$versions.firebase.core"
-    implementation "com.google.firebase:firebase-firestore:$versions.firebase.firestore"
-    implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
-    implementation "com.google.firebase:firebase-config:$versions.firebase.remote_config"
-
     // RxJava
     implementation "io.reactivex.rxjava2:rxandroid:$versions.rx.android"
     implementation "io.reactivex.rxjava2:rxjava:$versions.rx.core"
@@ -118,7 +115,7 @@ dependencies {
     implementation "com.jakewharton.timber:timber:$versions.timber"
 
     // Testing
-    testImplementation "org.jetbrains.kotlin:kotlin-test:$versions.kotlin"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$versions.kotlin.core"
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.21.0'
     testImplementation 'androidx.test:core:1.1.0'

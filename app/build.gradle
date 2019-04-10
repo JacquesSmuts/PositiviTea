@@ -112,7 +112,7 @@ dependencies {
     implementation 'com.jakewharton.rxrelay2:rxrelay:2.1.0'
 
     // Jake Wharton
-    implementation "com.jakewharton.timber:timber:$versions.timber"
+    implementation deps.timber
 
     // Testing
     testImplementation "org.jetbrains.kotlin:kotlin-test:$versions.kotlin.core"

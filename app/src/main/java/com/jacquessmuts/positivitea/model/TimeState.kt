@@ -2,7 +2,7 @@ package com.jacquessmuts.positivitea.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.blueair.api.RemoteConfig
 import com.jacquessmuts.positivitea.model.TimeState.Companion.TIMESTATE_TABLE
 import java.util.Date
 
@@ -23,7 +23,7 @@ data class TimeState(
 
     val canMakeNewApiCall: Boolean
         get() {
-            val hoursBetweenUpdate = FirebaseRemoteConfig.getInstance().getLong("hours_between_updates")
+            val hoursBetweenUpdate: Long = RemoteConfig.get("hours_between_updates")
             return (System.currentTimeMillis() - timeTeabagsUpdated) > (hoursBetweenUpdate * ONE_HOUR)
         }
 }

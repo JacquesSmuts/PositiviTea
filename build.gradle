@@ -53,7 +53,8 @@ buildscript {
                     firestore: "com.google.firebase:firebase-firestore:$versions.firebase.firestore",
                     authUi: 'com.firebaseui:firebase-ui-auth:4.3.1',
                     remoteConfig: "com.google.firebase:firebase-config:$versions.firebase.remote_config"
-            ]
+            ],
+            timber: "com.jakewharton.timber:timber:$versions.timber"
     ]
 
     dependencies {

@@ -8,7 +8,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
  * Exposes FirebaseRemoteConfig to rest of app
  */
 
-class RemoteConfig {
+object RemoteConfig {
 
     /**
      * Defaults set on app creation
@@ -25,6 +25,17 @@ class RemoteConfig {
         remoteConfig.setDefaults(R.xml.remote_config_defaults)
         remoteConfig.fetch().addOnCompleteListener { task ->
             remoteConfig.activateFetched()
+        }
+    }
+
+    inline fun<reified T> get(key: String): T {
+
+        val instance = FirebaseRemoteConfig.getInstance()
+
+        return when(T::class.objectInstance) {
+            is Long -> instance.getLong(key) as T
+            is String -> instance.getString(key) as T
+            else -> throw IllegalArgumentException("the ${T::class} class is not supported yet")
         }
     }
 

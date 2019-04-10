@@ -5,8 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.firebase.ui.auth.AuthUI
-import com.google.firebase.auth.FirebaseAuth
+import com.blueair.api.AuthService
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.adapter.TeaBagAdapter
 import com.jacquessmuts.positivitea.adapter.TeaBagVote
@@ -99,8 +98,7 @@ class MainActivity : BaseActivity() {
 
         fab.setOnClickListener {
 
-            val user = FirebaseAuth.getInstance().currentUser
-            if (user != null) {
+            if (AuthService.isUserLoggedIn()) {
                 val intent = Intent(this, AddActivity::class.java)
                 startActivity(intent)
             } else {
@@ -112,14 +110,6 @@ class MainActivity : BaseActivity() {
     }
 
     fun signIn() {
-        val providers = arrayListOf(
-            AuthUI.IdpConfig.EmailBuilder().build(),
-            AuthUI.IdpConfig.GoogleBuilder().build())
-
-        startActivity(
-            AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build())
+        startActivity(AuthService.generateAuthIntent())
     }
 }

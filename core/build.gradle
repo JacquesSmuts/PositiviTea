@@ -1,0 +1,68 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion 28
+
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Kotlin
+    api deps.kotlin.stdlib
+    api deps.kotlin.reflect
+    api deps.kotlin.coroutines.core
+    api deps.kotlin.coroutines.android
+
+    // Dependency Injection
+    api "org.kodein.di:kodein-di-generic-jvm:$versions.kodein"
+    api "org.kodein.di:kodein-di-framework-android-x:$versions.kodein"
+
+    // RxJava
+    api "io.reactivex.rxjava2:rxandroid:$versions.rx.android"
+    api "io.reactivex.rxjava2:rxjava:$versions.rx.core"
+    api "io.reactivex.rxjava2:rxkotlin:$versions.rx.kotlin"
+
+    // Logging
+    api deps.timber
+
+    // Database
+    api deps.android.room.runtime
+    api deps.android.room.coroutines
+    kapt deps.android.room.compiler
+
+    // Lifecycle components
+    api deps.android.lifecycle
+    kapt deps.android.lifecycleCompiler
+
+    implementation deps.android.appCompat
+
+    testImplementation deps.testing.kotlin
+    testImplementation deps.testing.junit
+    testImplementation deps.testing.androidxcore
+    androidTestImplementation deps.testing.androidxrunner
+    androidTestImplementation deps.testing.espressocore
+}

@@ -18,7 +18,6 @@ buildscript {
             kotlin: [
                     core: '1.3.21',
                     coroutines: '1.1.1'
-
             ],
             kodein: '6.1.0',
             timber: '4.7.1',
@@ -29,6 +28,9 @@ buildscript {
                     binding: '2.2.0'
             ],
             android: [
+                    core: '1.0.1',
+                    appcompat: '1.0.2',
+                    constraintLayout: '1.1.3',
                     room: '2.1.0-alpha04',
                     lifecycle: '2.0.0'
             ],
@@ -36,6 +38,13 @@ buildscript {
                     core: '16.0.8',
                     firestore: '18.1.0',
                     remote_config: '16.4.1'
+            ],
+            testing: [
+                    junit: '4.12',
+                    mockitocore: '2.21.0',
+                    androidxcore: '1.1.0',
+                    androidxrunner: '1.1.1',
+                    espressocore: '3.1.1'
             ]
     ]
 
@@ -43,9 +52,23 @@ buildscript {
             androidGradlePlugin: "com.android.tools.build:gradle:$versions.androidGradlePlugin",
             kotlin: [
                     stdlib: "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin.core",
+                    reflect: "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin.core",
                     coroutines: [
                             core: "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.kotlin.coroutines",
                             android: "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.kotlin.coroutines"
+                    ]
+            ],
+            android: [
+                    core: "androidx.core:core:$versions.android.core",
+                    appCompat: "androidx.appcompat:appcompat:$versions.android.appCompat",
+                    constraintLayout: "androidx.constraintlayout:constraintlayout:$versions.android.constraintLayout",
+                    lifecycle: "androidx.lifecycle:lifecycle-extensions:$versions.android.lifecycle",
+                    lifecycleCompiler: "android.arch.lifecycle:compiler:$versions.android.lifecycle",
+                    room: [
+                            runtime: "androidx.room:room-runtime:$versions.android.room",
+                            rxjava2: "androidx.room:room-rxjava2:$versions.android.room",
+                            coroutines: "androidx.room:room-coroutines:$versions.android.room",
+                            compiler: "androidx.room:room-compiler:$versions.android.room"
                     ]
             ],
             firebase: [
@@ -54,11 +77,23 @@ buildscript {
                     authUi: 'com.firebaseui:firebase-ui-auth:4.3.1',
                     remoteConfig: "com.google.firebase:firebase-config:$versions.firebase.remote_config"
             ],
-            timber: "com.jakewharton.timber:timber:$versions.timber"
+            kodein: [
+                    core: "org.kodein.di:kodein-di-generic-jvm:$versions.kodein",
+                    android: "org.kodein.di:kodein-di-framework-android-x:$versions.kodein"
+            ],
+            timber: "com.jakewharton.timber:timber:$versions.timber",
+            testing: [
+                    kotlin: "org.jetbrains.kotlin:kotlin-test:$versions.kotlin.core",
+                    junit: "junit:junit:$versions.testing.junit",
+                    mockitocore: "org.mockito:mockito-core:$versions.testing.mockitocore",
+                    androidxcore: "androidx.test:core:$versions.testing.androidxcore",
+                    androidxrunner: "androidx.test:runner:$versions.testing.androidxrunner",
+                    espressocore: "androidx.test.espresso:espresso-core:$versions.testing.espressocore"
+            ]
     ]
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0-alpha06'
+        classpath 'com.android.tools.build:gradle:3.5.0-alpha10'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin.core"
         classpath 'com.google.gms:google-services:4.2.0'
         // NOTE: Do not place your application dependencies here; they belong

@@ -1,15 +1,17 @@
 package com.jacquessmuts.positivitea.activity
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
 import android.widget.Toast
+import com.blueair.api.ServerClient
+import com.blueair.core.subscribeAndLogE
+import com.blueair.database.TeaRepository
 import com.jacquessmuts.positivitea.R
-import com.jacquessmuts.positivitea.service.TeaRepository
-import com.jacquessmuts.positivitea.util.subscribeAndLogE
 import com.jakewharton.rxbinding2.view.RxView
 import kotlinx.android.synthetic.main.activity_add.*
 import kotlinx.android.synthetic.main.content_add.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.kodein.di.generic.instance
 import java.util.concurrent.TimeUnit
 
@@ -32,8 +34,10 @@ class AddActivity : BaseActivity() {
             .filter { validateInputs() }
             .subscribeAndLogE {
                 progress.visibility = View.VISIBLE
-                teaRepository.saveUnapprovedTeaBagToServer(editTitle.text.toString(),
-                    editMessage.text.toString()) { success ->
+                launch {
+                    val success = (ServerClient.saveUnapprovedTeaBagToServer(editTitle.text.toString(),
+                        editMessage.text.toString()))
+
                     progress.visibility = View.GONE
 
                     val message = getString(if (success) {
@@ -41,13 +45,12 @@ class AddActivity : BaseActivity() {
                     } else {
                         R.string.add_failure
                     })
-                    val toast = Toast.makeText(this, message, Toast.LENGTH_LONG)
+                    val toast = Toast.makeText(this@AddActivity, message, Toast.LENGTH_LONG)
                     toast.show()
 
                     if (success) {
-                        Handler().postDelayed({
-                            onBackPressed()
-                        }, 3000)
+                        delay(3000)
+                        onBackPressed()
                     }
                 }
             })

@@ -1,8 +1,7 @@
-package com.jacquessmuts.positivitea.database
+package com.blueair.database
 
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.jacquessmuts.positivitea.model.TeaPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

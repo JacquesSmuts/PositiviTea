@@ -1,12 +1,11 @@
-package com.jacquessmuts.positivitea.database
+package com.blueair.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.jacquessmuts.positivitea.model.TeaBag
-import com.jacquessmuts.positivitea.model.TeaBag.Companion.TEABAG_TABLE
+import com.blueair.database.TeaBag.Companion.TEABAG_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06

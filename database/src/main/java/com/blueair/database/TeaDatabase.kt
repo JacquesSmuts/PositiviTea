@@ -1,13 +1,10 @@
-package com.jacquessmuts.positivitea.database
+package com.blueair.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.jacquessmuts.positivitea.model.TeaBag
-import com.jacquessmuts.positivitea.model.TeaPreferences
-import com.jacquessmuts.positivitea.model.TimeState
 
 @Database(
     entities = [TeaBag::class, TimeState::class, TeaPreferences::class],
@@ -32,7 +29,8 @@ abstract class TeaDatabase : RoomDatabase() {
                     INSTANCE = Room.databaseBuilder(
                         context,
                         TeaDatabase::class.java,
-                        DATABASE_NAME)
+                        DATABASE_NAME
+                    )
                         .addCallback(TeaDatabaseCallback())
                         .build()
                 }

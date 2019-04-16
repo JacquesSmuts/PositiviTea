@@ -3,22 +3,25 @@ package com.jacquessmuts.positivitea.activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.blueair.api.AuthService
+import com.blueair.api.ServerClient
+import com.blueair.core.filterRapidClicks
+import com.blueair.core.subscribeAndLogE
+import com.blueair.database.TeaRepository
+import com.blueair.database.TeaStrength
+import com.blueair.database.getDescription
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.adapter.TeaBagAdapter
 import com.jacquessmuts.positivitea.adapter.TeaBagVote
-import com.jacquessmuts.positivitea.model.TeaStrength
-import com.jacquessmuts.positivitea.model.getDescription
 import com.jacquessmuts.positivitea.service.NotificationService
-import com.jacquessmuts.positivitea.service.TeaRepository
-import com.jacquessmuts.positivitea.util.filterRapidClicks
-import com.jacquessmuts.positivitea.util.subscribeAndLogE
 import com.jacquessmuts.positivitea.viewmodel.MainViewModel
 import com.jakewharton.rxbinding2.widget.RxSeekBar
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.launch
 import org.kodein.di.generic.instance
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -44,6 +47,17 @@ class MainActivity : BaseActivity() {
         recyclerView.adapter = adapter
 
         linkViewModel()
+
+        //TODO: move this into a Service
+        launch {
+            val (teabags, timeState) =
+                ServerClient.getTeabagsFromServer(teaRepository.getTimeState())
+            if (timeState != null) {
+                teaRepository.saveTimeState(timeState)
+            }
+            teaRepository.saveTeabags(teabags)
+        }
+
     }
 
     private fun linkViewModel() {
@@ -84,15 +98,25 @@ class MainActivity : BaseActivity() {
             .filterRapidClicks()
             .subscribeAndLogE { teabagVote ->
                 if (teabagVote.isApproved) {
-                    teaRepository.approveTeabag(teabagVote.teaBag) {
-                        val toast = Toast.makeText(this, R.string.approved, Toast.LENGTH_LONG)
-                        toast.show()
+                    launch {
+                        if (ServerClient.approveTeabag(teabagVote.teaBag)) {
+                            teaRepository.deleteTeabag(teabagVote.teaBag.id)
+
+                            showMessage(R.string.approved)
+                        } else {
+                            showMessage(R.string.error)
+                        }
                     }
+
                 } else {
-                    teaRepository.deleteUnapprovedTeabag(teabagVote.teaBag.id) {
-                        val toast = Toast.makeText(this, R.string.deleted, Toast.LENGTH_LONG)
-                        toast.show()
+                    launch {
+                        if (ServerClient.deleteUnapprovedTeabag(teabagVote.teaBag.id)) {
+                            teaRepository.deleteTeabag(teabagVote.teaBag.id)
+                        } else {
+                            showMessage(R.string.error)
+                        }
                     }
+
                 }
             })
 
@@ -107,6 +131,11 @@ class MainActivity : BaseActivity() {
         }
 
         notificationService.scheduleNextNotification()
+    }
+
+    fun showMessage(@StringRes resId: Int) {
+        val toast = Toast.makeText(this@MainActivity, resId, Toast.LENGTH_LONG)
+        toast.show()
     }
 
     fun signIn() {

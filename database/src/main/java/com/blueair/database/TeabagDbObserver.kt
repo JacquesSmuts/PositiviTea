@@ -1,8 +1,6 @@
-package com.jacquessmuts.positivitea.database
+package com.blueair.database
 
 import androidx.room.InvalidationTracker
-
-import com.jacquessmuts.positivitea.model.TeaBag
 
 import io.reactivex.subjects.PublishSubject
 

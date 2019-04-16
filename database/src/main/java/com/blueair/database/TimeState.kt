@@ -1,9 +1,8 @@
-package com.jacquessmuts.positivitea.model
+package com.blueair.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.blueair.api.RemoteConfig
-import com.jacquessmuts.positivitea.model.TimeState.Companion.TIMESTATE_TABLE
+import com.blueair.database.TimeState.Companion.TIMESTATE_TABLE
 import java.util.Date
 
 /**
@@ -21,9 +20,7 @@ data class TimeState(
         const val ONE_HOUR = 60 * 60 * 1000 // 1 hour
     }
 
-    val canMakeNewApiCall: Boolean
-        get() {
-            val hoursBetweenUpdate: Long = RemoteConfig.get("hours_between_updates")
+    fun canMakeNewApiCall(hoursBetweenUpdate: Long): Boolean {
             return (System.currentTimeMillis() - timeTeabagsUpdated) > (hoursBetweenUpdate * ONE_HOUR)
         }
 }

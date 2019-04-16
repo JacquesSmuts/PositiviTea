@@ -1,6 +1,4 @@
-package com.jacquessmuts.positivitea.util
-
-import com.jacquessmuts.positivitea.BuildConfig
+package com.blueair.core
 
 /**
  * Created by jacquessmuts on 2019-03-24

@@ -76,10 +76,11 @@ play {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation project(path: ':api')
 
     // Local modules
     implementation project(':core')
+    implementation project(':api')
+    implementation project(':database')
 
     // Official Android
     implementation deps.android.core
@@ -94,10 +95,9 @@ dependencies {
     kapt "android.arch.lifecycle:compiler:$versions.android.lifecycle"
 
     // Database
-    implementation "androidx.room:room-runtime:$versions.android.room"
-    implementation "androidx.room:room-rxjava2:$versions.android.room"
-    implementation "androidx.room:room-coroutines:$versions.android.room"
-    kapt "androidx.room:room-compiler:$versions.android.room"
+    api deps.android.room.runtime
+    api deps.android.room.coroutines
+    kapt deps.android.room.compiler
 
     // Dependency Injection
     implementation deps.kodein.core

@@ -1,4 +1,4 @@
-package com.jacquessmuts.positivitea.util
+package com.blueair.core
 
 import io.reactivex.Observable
 import io.reactivex.Single

@@ -1,4 +1,4 @@
-package com.jacquessmuts.positivitea.firestore
+package com.blueair.api
 
 /**
  * Created by jacquessmuts on 2019-03-06

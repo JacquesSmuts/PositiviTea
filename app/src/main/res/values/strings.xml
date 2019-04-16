@@ -5,20 +5,6 @@
     <string name="how_often_message">How often do you want positive messages?</string>
     <string name="potential_message">Potential Messages:</string>
 
-    <string-array name="regularity">
-        <item>NON. STOP. MADNESS</item>
-        <item>Every ±5 minutes</item>
-        <item>Every ±10 minutes</item>
-        <item>Every ±30 minutes</item>
-        <item>Every ±1 hour</item>
-        <item>Every ±2 hours</item>
-        <item>Every ±4 hours</item>
-        <item>±3 times per day</item>
-        <item>±1 time per day</item>
-        <item>±3 times a week</item>
-        <item>±1 time per week</item>
-    </string-array>
-
     <string name="title_activity_add">AddActivity</string>
     <string name="title">Title</string>
     <string name="message">Message</string>
@@ -26,6 +12,7 @@
     <string name="add_success">Successfully saved. Your message might be approved later, but it\'s on your device right now.</string>
     <string name="add_failure">Failed to add. Try again later.</string>
     <string name="approved">Approved</string>
+    <string name="error">Error!</string>
     <string name="deleted">Deleted.</string>
 
 </resources>

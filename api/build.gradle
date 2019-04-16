@@ -27,9 +27,8 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    // Kotlin
-    implementation deps.kotlin.stdlib
-    implementation deps.kotlin.coroutines.core
+    implementation project(':database')
+    implementation project(':core')
 
     implementation deps.firebase.core
     implementation deps.firebase.firestore

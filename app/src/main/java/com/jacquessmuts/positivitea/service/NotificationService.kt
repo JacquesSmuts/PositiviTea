@@ -11,16 +11,16 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.blueair.core.ConversionUtils
+import com.blueair.core.CoroutineService
+import com.blueair.database.TeaBag
+import com.blueair.database.TeaPreferences
+import com.blueair.database.TeaRepository
+import com.blueair.database.TeaStrength
+import com.blueair.database.getWaitTimeInSeconds
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.activity.MainActivity
-import com.jacquessmuts.positivitea.database.TeaDatabase
-import com.jacquessmuts.positivitea.model.TeaBag
-import com.jacquessmuts.positivitea.model.TeaPreferences
-import com.jacquessmuts.positivitea.model.TeaStrength
-import com.jacquessmuts.positivitea.model.getWaitTimeInSeconds
-import com.jacquessmuts.positivitea.util.ConversionUtils
 import com.jacquessmuts.positivitea.workmanager.NotificationWorker
-import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.SupervisorJob
@@ -37,7 +37,7 @@ import kotlin.random.Random
  */
 class NotificationService(
     private val context: Context,
-    private val teaDb: TeaDatabase,
+    private val teaDb: com.blueair.database.TeaDatabase,
     private val teaRepository: TeaRepository
 ) : CoroutineService {
 
@@ -61,8 +61,6 @@ class NotificationService(
     private val teaPreferencesPublisher: PublishSubject<TeaPreferences> by lazy {
         PublishSubject.create<TeaPreferences>()
     }
-    val teaPreferencesObservable: Observable<TeaPreferences>
-        get() = teaPreferencesPublisher.hide()
 
     init {
         loadPreferences()

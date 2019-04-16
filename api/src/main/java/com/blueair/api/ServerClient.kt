@@ -1,6 +1,12 @@
 package com.blueair.api
 
+import com.blueair.core.AppUtils
+import com.blueair.database.TeaBag
+import com.blueair.database.TimeState
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import timber.log.Timber
+import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -10,17 +16,17 @@ import kotlin.coroutines.suspendCoroutine
  */
 object ServerClient {
 
-
     /**
      *
      */
-    suspend fun getTeabagsFromServer(forceLoad: Boolean = false) {
+    suspend fun getTeabagsFromServer(timeState: TimeState, forceLoad: Boolean = false): Pair<List<TeaBag>, TimeState?> {
 
         Timber.v("Considering getting teabags from server")
 
         // There might be a race condition here where timeState could be null on first startup, hence == true
-        if (!(timeState?.canMakeNewApiCall == true || forceLoad))
-            return
+        val hours = RemoteConfig.get<Long>("hours_between_updates")
+        if (!(timeState.canMakeNewApiCall(RemoteConfig.get("hours_between_updates")) == true || forceLoad))
+            return Pair(listOf(), null)
 
         Timber.d("Getting teabags from server")
 
@@ -32,7 +38,7 @@ object ServerClient {
 
         val firestore = FirebaseFirestore.getInstance()
 
-        suspendCoroutine<Boolean> { continuation ->
+        return suspendCoroutine { continuation ->
             firestore.collection(collection)
                 .get()
                 .addOnCompleteListener { task ->
@@ -47,14 +53,96 @@ object ServerClient {
                                 score = document.getLong(FirestoreConstants.FIELD_SCORE) ?: 0))
                         }
 
-                        saveTeabags(nuTeaBags)
-                        timeState = TimeState(timeTeabagsUpdated = System.currentTimeMillis())
                         Timber.i("A total of ${nuTeaBags.size} Teabags downloaded")
-                        continuation.resume(true)
+                        continuation.resume(Pair(nuTeaBags,
+                            TimeState(timeTeabagsUpdated = System.currentTimeMillis())))
                     } else {
                         Timber.e("Error getting documents. ${task.exception}")
-                        continuation.resume(false)
+                        continuation.resume(Pair(listOf<TeaBag>(), null))
                     }
+                }
+        }
+    }
+
+
+    suspend fun approveTeabag(approvedTeabag: TeaBag): Boolean {
+
+        val firstSucccess = suspendCoroutine<Boolean> { continuation ->
+            val docData = HashMap<String, Any?>()
+            docData["title"] = approvedTeabag.title
+            docData["message"] = approvedTeabag.message
+            docData["score"] = approvedTeabag.score
+
+            Timber.i("Saving teabag to server. Teabag = $approvedTeabag")
+
+            FirebaseFirestore.getInstance()
+                .collection(FirestoreConstants.COLLECTION_TEABAGS)
+                .document(approvedTeabag.id)
+                .set(docData, SetOptions.merge())
+                .addOnCompleteListener { result ->
+                    Timber.d("Approved teabag. Success = ${result.isSuccessful}")
+                    continuation.resume(result.isSuccessful)
+                }
+        }
+
+        if (firstSucccess) {
+            deleteUnapprovedTeabag(approvedTeabag.id)
+        }
+        return firstSucccess
+    }
+
+    suspend fun deleteUnapprovedTeabag(id: String): Boolean {
+
+        return suspendCoroutine { continuation ->
+            FirebaseFirestore.getInstance()
+                .collection(FirestoreConstants.COLLECTION_UNAPPROVED_TEABAGS)
+                .document(id)
+                .delete()
+                .addOnCompleteListener { result ->
+                    // if (result.isSuccessful && deleteFromLocalDb) {
+                    //     // TODO: launch {
+                    //     //     teaDb.teabagDao().delete(id)
+                    //     // }
+                    // }
+                    continuation.resume(result.isSuccessful)
+
+                    Timber.d("Saved teabag. Success = ${result.isSuccessful}")
+                }
+        }
+    }
+
+    suspend fun saveUnapprovedTeaBagToServer(title: String, message: String): Boolean {
+        require(title.isNotBlank())
+        require(message.isNotBlank())
+
+        val nuTeabag = TeaBag(
+            id = UUID.randomUUID().toString(),
+            title = title,
+            message = message,
+            score = 0L
+        )
+
+        val docData = HashMap<String, Any?>()
+        docData["title"] = nuTeabag.title
+        docData["message"] = nuTeabag.message
+        docData["score"] = nuTeabag.score
+
+        Timber.i("Saving teabag to server. Teabag = $nuTeabag")
+
+        return suspendCoroutine { continuation ->
+            FirebaseFirestore.getInstance()
+                .collection(FirestoreConstants.COLLECTION_UNAPPROVED_TEABAGS)
+                .document(nuTeabag.id)
+                .set(docData, SetOptions.merge())
+                .addOnCompleteListener { result ->
+                    if (result.isSuccessful) {
+                        //TODO launch {
+                        //     teaDb.teabagDao().insert(nuTeabag)
+                        // }
+                    }
+                    continuation.resume(result.isSuccessful)
+
+                    Timber.d("Saved teabag. Success = ${result.isSuccessful}")
                 }
         }
     }

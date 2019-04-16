@@ -1,7 +1,6 @@
-package com.jacquessmuts.positivitea.database
+package com.blueair.database
 
 import androidx.room.TypeConverter
-import com.jacquessmuts.positivitea.model.TeaStrength
 
 class Converters {
     companion object {

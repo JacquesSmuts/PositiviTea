@@ -1,11 +1,12 @@
-package com.jacquessmuts.positivitea.database
+package com.blueair.database
 
+import androidx.annotation.WorkerThread
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.jacquessmuts.positivitea.model.TimeState
-import com.jacquessmuts.positivitea.model.TimeState.Companion.TIMESTATE_TABLE
+import com.blueair.database.TimeState.Companion.TIMESTATE_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06
@@ -14,8 +15,12 @@ import com.jacquessmuts.positivitea.model.TimeState.Companion.TIMESTATE_TABLE
 @Dao
 interface TimeStateDao {
 
+    @WorkerThread
+    @Query("SELECT * from $TIMESTATE_TABLE WHERE ID = ${TimeState.ID} LIMIT 1")
+    suspend fun timeState(): TimeState
+
     @get:Query("SELECT * from $TIMESTATE_TABLE WHERE ID = ${TimeState.ID} LIMIT 1")
-    val timeState: TimeState
+    val liveTimeState: LiveData<TimeState>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(timeState: TimeState)

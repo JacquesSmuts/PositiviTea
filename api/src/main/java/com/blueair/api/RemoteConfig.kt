@@ -2,6 +2,7 @@ package com.blueair.api
 
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
+import kotlin.reflect.KClass
 
 /**
  * Created by jacquessmuts on 2019-04-07
@@ -32,8 +33,10 @@ object RemoteConfig {
 
         val instance = FirebaseRemoteConfig.getInstance()
 
-        return when(T::class.objectInstance) {
-            is Long -> instance.getLong(key) as T
+        val clazz = T::class
+
+        return when(T::class) {
+            is KClass<Long> -> instance.getLong(key) as T
             is String -> instance.getString(key) as T
             else -> throw IllegalArgumentException("the ${T::class} class is not supported yet")
         }

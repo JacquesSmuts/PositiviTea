@@ -1,8 +1,6 @@
-package com.jacquessmuts.positivitea.model
+package com.blueair.database
 
 import android.content.Context
-import com.jacquessmuts.positivitea.R
-import com.jacquessmuts.positivitea.model.TeaStrength.Companion.ACCEPTABLE_STRENGTH_RANGE
 
 /**
  * Created by jacquessmuts on 2019-03-08

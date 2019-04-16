@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">database</string>
+
+
+    <string-array name="regularity">
+        <item>NON. STOP. MADNESS</item>
+        <item>Every ±5 minutes</item>
+        <item>Every ±10 minutes</item>
+        <item>Every ±30 minutes</item>
+        <item>Every ±1 hour</item>
+        <item>Every ±2 hours</item>
+        <item>Every ±4 hours</item>
+        <item>±3 times per day</item>
+        <item>±1 time per day</item>
+        <item>±3 times a week</item>
+        <item>±1 time per week</item>
+    </string-array>
+
 </resources>

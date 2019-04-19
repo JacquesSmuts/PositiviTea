@@ -3,6 +3,7 @@ package com.blueair.database
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.blueair.database.TimeState.Companion.TIMESTATE_TABLE
+import timber.log.Timber
 import java.util.Date
 
 /**
@@ -20,9 +21,13 @@ data class TimeState(
         const val ONE_HOUR = 60 * 60 * 1000 // 1 hour
     }
 
-    fun canMakeNewApiCall(hoursBetweenUpdate: Long): Boolean {
-            return (System.currentTimeMillis() - timeTeabagsUpdated) > (hoursBetweenUpdate * ONE_HOUR)
+    fun canMakeNewApiCall(hoursBetweenUpdate: Long?): Boolean {
+        if (hoursBetweenUpdate == null) {
+            Timber.w("hoursBetweenUpdate shouldn't be null")
+            return false
         }
+        return (System.currentTimeMillis() - timeTeabagsUpdated) > (hoursBetweenUpdate * ONE_HOUR)
+    }
 }
 
 val TimeState.dateTeabagsUpdated: Date

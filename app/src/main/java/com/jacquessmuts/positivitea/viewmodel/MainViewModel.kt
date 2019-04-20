@@ -2,9 +2,9 @@ package com.jacquessmuts.positivitea.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.LiveData
-import com.blueair.database.TeaBag
-import com.blueair.database.TeaPreferences
-import com.blueair.database.TeaRepository
+import com.jacquessmuts.database.TeaBag
+import com.jacquessmuts.database.TeaPreferences
+import com.jacquessmuts.database.TeaRepository
 import org.kodein.di.generic.instance
 
 /**

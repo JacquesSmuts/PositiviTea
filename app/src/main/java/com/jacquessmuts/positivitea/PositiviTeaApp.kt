@@ -2,9 +2,9 @@ package com.jacquessmuts.positivitea
 
 import android.app.Application
 import android.content.Context
-import com.blueair.api.RemoteConfig
+import com.jacquessmuts.api.RemoteConfig
+import com.jacquessmuts.database.TeaRepository
 import com.jacquessmuts.positivitea.service.NotificationService
-import com.blueair.database.TeaRepository
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.bind
@@ -22,13 +22,13 @@ class PositiviTeaApp : Application(), KodeinAware {
     override val kodein by Kodein.lazy {
         bind<Application>() with instance(this@PositiviTeaApp)
         bind<Context>() with instance(applicationContext)
-        bind<com.blueair.database.TeaDatabase>() with singleton { com.blueair.database.TeaDatabase.getDatabase(applicationContext) }
+        bind<com.jacquessmuts.database.TeaDatabase>() with singleton { com.jacquessmuts.database.TeaDatabase.getDatabase(applicationContext) }
         bind<TeaRepository>() with eagerSingleton {
             TeaRepository(
                 instance()
             )
         }
-        bind<NotificationService>() with singleton { NotificationService(applicationContext, instance(), instance()) }
+        bind<NotificationService>() with singleton { NotificationService(applicationContext, instance()) }
     }
 
     override fun onCreate() {

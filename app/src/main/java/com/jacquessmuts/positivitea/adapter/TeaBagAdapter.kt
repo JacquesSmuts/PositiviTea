@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jacquessmuts.positivitea.R
-import com.blueair.database.TeaBag
-import com.blueair.core.AppUtils
+import com.jacquessmuts.database.TeaBag
+import com.jacquessmuts.core.AppUtils
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.item_teabag.view.*
 

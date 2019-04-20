@@ -3,9 +3,9 @@ package com.jacquessmuts.positivitea.activity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import com.blueair.api.ServerClient
-import com.blueair.core.subscribeAndLogE
-import com.blueair.database.TeaRepository
+import com.jacquessmuts.api.ServerClient
+import com.jacquessmuts.core.subscribeAndLogE
+import com.jacquessmuts.database.TeaRepository
 import com.jacquessmuts.positivitea.R
 import com.jakewharton.rxbinding2.view.RxView
 import kotlinx.android.synthetic.main.activity_add.*

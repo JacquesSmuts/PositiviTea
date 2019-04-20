@@ -11,18 +11,19 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.blueair.core.ConversionUtils
-import com.blueair.core.CoroutineService
-import com.blueair.database.TeaBag
-import com.blueair.database.TeaPreferences
-import com.blueair.database.TeaRepository
-import com.blueair.database.TeaStrength
-import com.blueair.database.getWaitTimeInSeconds
+import com.jacquessmuts.core.ConversionUtils
+import com.jacquessmuts.core.CoroutineService
+import com.jacquessmuts.database.TeaBag
+import com.jacquessmuts.database.TeaPreferences
+import com.jacquessmuts.database.TeaRepository
+import com.jacquessmuts.database.TeaStrength
+import com.jacquessmuts.database.getWaitTimeInSeconds
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.activity.MainActivity
 import com.jacquessmuts.positivitea.workmanager.NotificationWorker
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -37,7 +38,6 @@ import kotlin.random.Random
  */
 class NotificationService(
     private val context: Context,
-    private val teaDb: com.blueair.database.TeaDatabase,
     private val teaRepository: TeaRepository
 ) : CoroutineService {
 
@@ -63,7 +63,10 @@ class NotificationService(
     }
 
     init {
-        loadPreferences()
+        launch(Dispatchers.IO) {
+            teaPreferences = teaRepository.loadPreferences()
+        }
+
 
         // TODO: do this slightly less often
         createNotificationChannel()
@@ -86,16 +89,7 @@ class NotificationService(
         }
     }
 
-    private fun loadPreferences() {
-        launch {
-            val loadedTeaPreferences: TeaPreferences? = teaDb.teaPreferencesDao().teaPreferences
-            teaPreferences = if (loadedTeaPreferences == null) {
-                TeaPreferences()
-            } else {
-                loadedTeaPreferences
-            }
-        }
-    }
+
 
     fun updateTeaStrength(nuStrength: TeaStrength) {
 
@@ -105,11 +99,7 @@ class NotificationService(
         teaPreferences = preferences.copy(teaStrength = nuStrength, previousStrength = oldStrength)
         Timber.d("Saving teaPreferences as $teaPreferences")
 
-        launch {
-            teaPreferences?.let {
-                teaDb.teaPreferencesDao().insert(it)
-            }
-        }
+        teaPreferences?.let { teaRepository.savePreferences(it) }
     }
 
     fun scheduleNextNotification() {

@@ -5,13 +5,21 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.jacquessmuts.database.dao.TeaPreferencesDao
+import com.jacquessmuts.database.dao.TeabagDao
+import com.jacquessmuts.database.dao.TimeStateDao
+import com.jacquessmuts.database.model.TeaBagTable
+import com.jacquessmuts.database.model.TeaPreferencesTable
+import com.jacquessmuts.database.model.TimeStateTable
+import com.jacquessmuts.database.util.Converters
+import com.jacquessmuts.database.util.TeaDatabaseCallback
 
 @Database(
-    entities = [TeaBag::class, TimeState::class, TeaPreferences::class],
+    entities = [TeaBagTable::class, TimeStateTable::class, TeaPreferencesTable::class],
     exportSchema = false,
-    version = 1)
+    version = 2)
 @TypeConverters(Converters::class)
-abstract class TeaDatabase : RoomDatabase() {
+internal abstract class TeaDatabase : RoomDatabase() {
 
     abstract fun teabagDao(): TeabagDao
 

@@ -1,8 +1,9 @@
-package com.jacquessmuts.database
+package com.jacquessmuts.database.util
 
 import androidx.room.TypeConverter
+import com.jacquessmuts.core.model.TeaStrength
 
-class Converters {
+internal class Converters {
     companion object {
         @TypeConverter
         @JvmStatic

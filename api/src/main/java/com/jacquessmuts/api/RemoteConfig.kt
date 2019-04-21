@@ -8,7 +8,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
  * Exposes FirebaseRemoteConfig to rest of app
  */
 
-object RemoteConfig {
+internal object RemoteConfig {
 
     /**
      * Defaults set on app creation

@@ -1,6 +1,7 @@
-package com.jacquessmuts.database
+package com.jacquessmuts.core.model
 
 import android.content.Context
+import com.jacquessmuts.core.R
 
 /**
  * Created by jacquessmuts on 2019-03-08

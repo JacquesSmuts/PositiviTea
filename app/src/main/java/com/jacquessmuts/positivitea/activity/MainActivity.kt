@@ -9,10 +9,10 @@ import androidx.lifecycle.ViewModelProviders
 import com.jacquessmuts.api.AuthService
 import com.jacquessmuts.api.ServerClient
 import com.jacquessmuts.core.filterRapidClicks
+import com.jacquessmuts.core.model.TeaStrength
+import com.jacquessmuts.core.model.getDescription
 import com.jacquessmuts.core.subscribeAndLogE
 import com.jacquessmuts.database.TeaRepository
-import com.jacquessmuts.database.TeaStrength
-import com.jacquessmuts.database.getDescription
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.adapter.TeaBagAdapter
 import com.jacquessmuts.positivitea.adapter.TeaBagVote

@@ -3,8 +3,8 @@ package com.jacquessmuts.api
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.jacquessmuts.core.AppUtils
-import com.jacquessmuts.database.TeaBag
-import com.jacquessmuts.database.TimeState
+import com.jacquessmuts.core.model.TeaBag
+import com.jacquessmuts.core.model.TimeState
 import timber.log.Timber
 import java.util.UUID
 import kotlin.coroutines.resume
@@ -15,6 +15,10 @@ import kotlin.coroutines.suspendCoroutine
  * Used to get and post api calls to the server (firestore)
  */
 object ServerClient {
+
+    fun setDefaults(){
+        RemoteConfig.setDefaults()
+    }
 
     /**
      *
@@ -46,16 +50,22 @@ object ServerClient {
 
                         val nuTeaBags = mutableListOf<TeaBag>()
                         for (document in task.result!!) {
-                            nuTeaBags.add(TeaBag(
-                                id = document.id,
-                                title = document.getString(FirestoreConstants.FIELD_TITLE) ?: "",
-                                message = document.getString(FirestoreConstants.FIELD_MESSAGE) ?: "",
-                                score = document.getLong(FirestoreConstants.FIELD_SCORE) ?: 0))
+                            nuTeaBags.add(
+                                TeaBag(
+                                    id = document.id,
+                                    title = document.getString(FirestoreConstants.FIELD_TITLE)
+                                        ?: "",
+                                    message = document.getString(FirestoreConstants.FIELD_MESSAGE)
+                                        ?: "",
+                                    score = document.getLong(FirestoreConstants.FIELD_SCORE) ?: 0
+                                )
+                            )
                         }
 
                         Timber.i("A total of ${nuTeaBags.size} Teabags downloaded")
                         continuation.resume(Pair(nuTeaBags,
-                            TimeState(timeTeabagsUpdated = System.currentTimeMillis())))
+                            TimeState(timeTeabagsUpdated = System.currentTimeMillis())
+                        ))
                     } else {
                         Timber.e("Error getting documents. ${task.exception}")
                         continuation.resume(Pair(listOf<TeaBag>(), null))

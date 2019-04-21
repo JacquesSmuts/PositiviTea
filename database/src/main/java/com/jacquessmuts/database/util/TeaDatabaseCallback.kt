@@ -1,12 +1,16 @@
-package com.jacquessmuts.database
+package com.jacquessmuts.database.util
 
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.jacquessmuts.core.model.TeaPreferences
+import com.jacquessmuts.database.TeaDatabase
+import com.jacquessmuts.database.dao.TeaPreferencesDao
+import com.jacquessmuts.database.model.TeaPreferencesTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class TeaDatabaseCallback : RoomDatabase.Callback() {
+internal class TeaDatabaseCallback : RoomDatabase.Callback() {
 
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
@@ -17,7 +21,7 @@ class TeaDatabaseCallback : RoomDatabase.Callback() {
 
     fun populateDatabase(teaPreferencesDao: TeaPreferencesDao) {
         GlobalScope.launch(Dispatchers.IO){
-            teaPreferencesDao.insert(TeaPreferences())
+            teaPreferencesDao.insert(TeaPreferencesTable.from(TeaPreferences()))
         }
     }
 }

@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.jacquessmuts.positivitea.R
-import com.jacquessmuts.database.TeaBag
 import com.jacquessmuts.core.AppUtils
+import com.jacquessmuts.core.model.TeaBag
+import com.jacquessmuts.positivitea.R
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.item_teabag.view.*
 

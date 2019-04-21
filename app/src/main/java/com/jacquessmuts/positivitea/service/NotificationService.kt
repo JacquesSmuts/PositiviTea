@@ -13,11 +13,11 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.jacquessmuts.core.ConversionUtils
 import com.jacquessmuts.core.CoroutineService
-import com.jacquessmuts.database.TeaBag
-import com.jacquessmuts.database.TeaPreferences
+import com.jacquessmuts.core.model.TeaBag
+import com.jacquessmuts.core.model.TeaPreferences
 import com.jacquessmuts.database.TeaRepository
-import com.jacquessmuts.database.TeaStrength
-import com.jacquessmuts.database.getWaitTimeInSeconds
+import com.jacquessmuts.core.model.TeaStrength
+import com.jacquessmuts.core.model.getWaitTimeInSeconds
 import com.jacquessmuts.positivitea.R
 import com.jacquessmuts.positivitea.activity.MainActivity
 import com.jacquessmuts.positivitea.workmanager.NotificationWorker

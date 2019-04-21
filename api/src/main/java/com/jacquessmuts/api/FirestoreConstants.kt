@@ -4,7 +4,7 @@ package com.jacquessmuts.api
  * Created by jacquessmuts on 2019-03-06
  * This is to house all of the names for collections, fields, references in the firestore db
  */
-object FirestoreConstants {
+internal object FirestoreConstants {
 
     // Teabags
     const val COLLECTION_TEABAGS = "teabags"

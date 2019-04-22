@@ -8,14 +8,14 @@ import androidx.room.TypeConverters
 import com.jacquessmuts.database.dao.TeaPreferencesDao
 import com.jacquessmuts.database.dao.TeabagDao
 import com.jacquessmuts.database.dao.TimeStateDao
-import com.jacquessmuts.database.model.TeaBagTable
-import com.jacquessmuts.database.model.TeaPreferencesTable
-import com.jacquessmuts.database.model.TimeStateTable
+import com.jacquessmuts.database.model.TeaBagEntity
+import com.jacquessmuts.database.model.TeaPreferencesEntity
+import com.jacquessmuts.database.model.TimeStateEntity
 import com.jacquessmuts.database.util.Converters
 import com.jacquessmuts.database.util.TeaDatabaseCallback
 
 @Database(
-    entities = [TeaBagTable::class, TimeStateTable::class, TeaPreferencesTable::class],
+    entities = [TeaBagEntity::class, TimeStateEntity::class, TeaPreferencesEntity::class],
     exportSchema = false,
     version = 2)
 @TypeConverters(Converters::class)

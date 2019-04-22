@@ -8,9 +8,9 @@ import com.jacquessmuts.core.model.TeaBag
 import com.jacquessmuts.core.model.TeaPreferences
 import com.jacquessmuts.core.model.TimeState
 import com.jacquessmuts.core.subscribeAndLogE
-import com.jacquessmuts.database.model.TeaBagTable
-import com.jacquessmuts.database.model.TeaPreferencesTable
-import com.jacquessmuts.database.model.TimeStateTable
+import com.jacquessmuts.database.model.TeaBagEntity
+import com.jacquessmuts.database.model.TeaPreferencesEntity
+import com.jacquessmuts.database.model.TimeStateEntity
 import com.jacquessmuts.database.util.TeabagDbObserver
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -71,8 +71,8 @@ class TeaRepository(private val applicationContext: Context) : CoroutineService 
             teaBagDbPublisher
         )
     }
-    private val teaBagDbPublisher: PublishSubject<List<TeaBagTable>> by lazy {
-        PublishSubject.create<List<TeaBagTable>>()
+    private val teaBagDbPublisher: PublishSubject<List<TeaBagEntity>> by lazy {
+        PublishSubject.create<List<TeaBagEntity>>()
     }
 
     init {
@@ -105,7 +105,7 @@ class TeaRepository(private val applicationContext: Context) : CoroutineService 
     }
 
     suspend fun loadPreferences(): TeaPreferences {
-        val loadedTeaPreferences: TeaPreferencesTable? = teaDb.teaPreferencesDao().teaPreferences()
+        val loadedTeaPreferences: TeaPreferencesEntity? = teaDb.teaPreferencesDao().teaPreferences()
         return if (loadedTeaPreferences == null) {
             TeaPreferences()
         } else {
@@ -115,7 +115,7 @@ class TeaRepository(private val applicationContext: Context) : CoroutineService 
 
     fun savePreferences(teaPreferences: TeaPreferences) {
         GlobalScope.launch(Dispatchers.IO){
-            teaDb.teaPreferencesDao().insert(TeaPreferencesTable.from(teaPreferences))
+            teaDb.teaPreferencesDao().insert(TeaPreferencesEntity.from(teaPreferences))
         }
     }
 
@@ -132,7 +132,7 @@ class TeaRepository(private val applicationContext: Context) : CoroutineService 
 
     fun saveTimeState(timeState: TimeState) {
         GlobalScope.launch(Dispatchers.IO) {
-            teaDb.timeStateDao().insert(TimeStateTable.from(timeState))
+            teaDb.timeStateDao().insert(TimeStateEntity.from(timeState))
         }
     }
 
@@ -145,7 +145,7 @@ class TeaRepository(private val applicationContext: Context) : CoroutineService 
     fun saveTeabags(teaBags: List<TeaBag>) {
         GlobalScope.launch (Dispatchers.IO) {
             teaBags.forEach {
-                teaDb.teabagDao().insert(TeaBagTable.from(it))
+                teaDb.teabagDao().insert(TeaBagEntity.from(it))
             }
         }
     }

@@ -3,7 +3,7 @@ package com.jacquessmuts.database.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.jacquessmuts.core.model.TeaBag
-import com.jacquessmuts.database.model.TeaBagTable.Companion.TEABAG_TABLE
+import com.jacquessmuts.database.model.TeaBagEntity.Companion.TEABAG_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06
@@ -13,7 +13,7 @@ import com.jacquessmuts.database.model.TeaBagTable.Companion.TEABAG_TABLE
  * a migration.
  */
 @Entity(tableName = TEABAG_TABLE)
-internal data class TeaBagTable(
+internal data class TeaBagEntity(
     @PrimaryKey val id: String,
     val title: String,
     val message: String,
@@ -23,8 +23,8 @@ internal data class TeaBagTable(
     companion object {
         const val TEABAG_TABLE = "teabag_table"
 
-        fun from(teaBag: TeaBag): TeaBagTable {
-            return TeaBagTable(teaBag.id, teaBag.title, teaBag.message, teaBag.score)
+        fun from(teaBag: TeaBag): TeaBagEntity {
+            return TeaBagEntity(teaBag.id, teaBag.title, teaBag.message, teaBag.score)
         }
     }
 

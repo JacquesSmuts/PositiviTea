@@ -5,8 +5,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.jacquessmuts.database.model.TeaBagTable
-import com.jacquessmuts.database.model.TeaBagTable.Companion.TEABAG_TABLE
+import com.jacquessmuts.database.model.TeaBagEntity
+import com.jacquessmuts.database.model.TeaBagEntity.Companion.TEABAG_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06
@@ -16,13 +16,13 @@ import com.jacquessmuts.database.model.TeaBagTable.Companion.TEABAG_TABLE
 internal interface TeabagDao {
 
     @get:Query("SELECT * from $TEABAG_TABLE ORDER BY score DESC")
-    val allTeaBags: List<TeaBagTable>
+    val allTeaBags: List<TeaBagEntity>
 
     @get:Query("SELECT * from $TEABAG_TABLE ORDER BY score DESC")
-    val liveAllTeaBags: LiveData<List<TeaBagTable>>
+    val liveAllTeaBags: LiveData<List<TeaBagEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(teaBag: TeaBagTable)
+    fun insert(teaBag: TeaBagEntity)
 
     @Query("DELETE FROM $TEABAG_TABLE WHERE ID = :id")
     fun delete(id: String)

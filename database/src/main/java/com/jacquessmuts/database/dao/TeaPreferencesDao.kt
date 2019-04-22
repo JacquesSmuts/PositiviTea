@@ -6,8 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.jacquessmuts.core.model.TeaPreferences
-import com.jacquessmuts.database.model.TeaPreferencesTable
-import com.jacquessmuts.database.model.TeaPreferencesTable.Companion.PREFERENCES_TABLE
+import com.jacquessmuts.database.model.TeaPreferencesEntity
+import com.jacquessmuts.database.model.TeaPreferencesEntity.Companion.PREFERENCES_TABLE
 
 /**
  * Created by jacquessmuts on 2019-03-06
@@ -17,13 +17,13 @@ import com.jacquessmuts.database.model.TeaPreferencesTable.Companion.PREFERENCES
 internal interface TeaPreferencesDao {
 
     @Query("SELECT * from $PREFERENCES_TABLE WHERE ID = :id LIMIT 1")
-    fun liveTeaPreferences(id: Int): LiveData<TeaPreferencesTable>
+    fun liveTeaPreferences(id: Int): LiveData<TeaPreferencesEntity>
 
     @Query("SELECT * from $PREFERENCES_TABLE WHERE ID = ${TeaPreferences.ID} LIMIT 1")
-    suspend fun teaPreferences(): TeaPreferencesTable
+    suspend fun teaPreferences(): TeaPreferencesEntity
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(teaPreferences: TeaPreferencesTable)
+    suspend fun insert(teaPreferences: TeaPreferencesEntity)
 
     @Query("DELETE FROM $PREFERENCES_TABLE")
     suspend fun deleteAll()
